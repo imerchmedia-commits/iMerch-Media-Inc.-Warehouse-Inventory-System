@@ -1195,7 +1195,7 @@
   </div>
   <script>
     // PALITAN ITO NG DEPLOYED GOOGLE APPS SCRIPT WEB APP URL MO
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsaWsSCZ9LfKGaw-soxmgEoGyZ8cbbQpEEF6WE5RK05r2NmkyVQMPQ0JyuFy-nbGWd/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKmsU78O9E-pTb-88KCf00a11b-PWqB97tsMy9hFeNBlv1VKXa4XIW6QAoyEU7XunM/exec';
 
     const STORAGE_KEY_THEME = 'imerch_theme_mode';
     const STORAGE_KEY_TOKEN = 'imerch_wh_session_token';
@@ -1375,6 +1375,23 @@
         }
 
         if (json.status === 'success') {
+          if (Array.isArray(json.clients) && json.clients.length > 0) {
+            const mergedClients = Array.from(new Set(json.clients.map(c => String(c || '').trim().toUpperCase()).filter(Boolean)));
+            localStorage.setItem(STORAGE_KEY_CUSTOM_CLIENTS, JSON.stringify(mergedClients));
+          }
+          if (Array.isArray(json.catalog) && json.catalog.length > 0) {
+            const customFromSheet = json.catalog
+              .filter(item => item && item.name)
+              .map(item => ({
+                category: String(item.category || 'Pop Materials').trim(),
+                name: String(item.name || '').trim(),
+                unit: String(item.unit || 'pcs').trim() || 'pcs',
+                isPolo: Boolean(item.isPolo)
+              }));
+            localStorage.setItem(STORAGE_KEY_CUSTOM_ITEMS, JSON.stringify(customFromSheet));
+            renderItemDropdowns();
+          }
+
           receivingList = (json.receiving || []).map(r => ({
             receiptId: String(r['Receipt ID'] || ''),
             agencySupplier: String(r['Agency/Supplier'] || ''),
@@ -2481,12 +2498,14 @@
         'Quantity Received': r.quantityReceived,
         'Remaining Stock': r.remainingStock,
         'Unit': r.unit,
+        'Status': r.status || (r.remainingStock > 0 ? 'In Stock' : 'Depleted / Out'),
         'Remarks': r.remarks,
         'Delivered By': r.deliveredBy,
         'Plate #': r.plateNo,
         'Checked/Received By': r.checkedBy,
         'Approved By': r.approvedBy,
-        'ASN Note': r.asnNote
+        'ASN Note': r.asnNote,
+        'Photo / ASN Link': r.photoLink || ''
       }));
 
       const witRows = (selectedClient === 'ALL'
@@ -2506,12 +2525,15 @@
         'Remarks': w.remarks,
         'Requested By': w.requestedBy,
         'Noted By': w.notedBy,
-        'Released By': w.releasedBy
+        'Released By': w.releasedBy,
+        'Item Photo Link': w.itemPhotoLink || ''
       }));
 
       const stats = computeClientStats();
       const kpiRows = (selectedClient === 'ALL' ? Object.values(stats) : [stats[selectedClient]].filter(Boolean)).map(s => ({
         'Client': s.client,
+        'Receiving Batches': s.receiptCount,
+        'Withdrawal Slips': s.withdrawalCount,
         'Total Receiving (Stock In)': s.receivingQty,
         'Delivery / Available Stock': s.deliveryQty,
         'Total Withdrawal (Stock Out)': s.withdrawalQty
