@@ -832,10 +832,10 @@
               <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input type="text" id="searchInput" oninput="renderLedgerTables()" placeholder="Search ID, client, supplier, item..." class="w-full rounded-xl pl-9 pr-3.5 py-2 text-xs sm:text-sm glass-input" />
+              <input type="text" id="searchInput" oninput="renderLedgerTables(true)" placeholder="Search ID, client, supplier, item..." class="w-full rounded-xl pl-9 pr-3.5 py-2 text-xs sm:text-sm glass-input" />
             </div>
 
-            <select id="filterStockStatus" onchange="renderLedgerTables()" class="rounded-xl px-3 py-2 text-xs sm:text-sm glass-input">
+            <select id="filterStockStatus" onchange="renderLedgerTables(true)" class="rounded-xl px-3 py-2 text-xs sm:text-sm glass-input">
               <option value="ALL">All Stock Status</option>
               <option value="AVAILABLE">With Available Stock</option>
               <option value="DEPLETED">Depleted / Out</option>
@@ -860,6 +860,20 @@
             </thead>
             <tbody id="receivingTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-700/50 text-xs sm:text-sm"></tbody>
           </table>
+        <!-- Receiving Pagination Controls -->
+<div id="receivingPaginationBar" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-slate-200/40 dark:bg-slate-800/60 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
+  <span id="receivingPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0–0 of 0</span>
+  <div class="flex items-center gap-2">
+    <button type="button" id="recPrevBtn" onclick="changeLedgerPage('receiving', -1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-sky-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+      &larr; Back
+    </button>
+    <span id="recPageBadge" class="font-mono font-bold px-2.5 py-1 rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-300">Page 1 / 1</span>
+    <button type="button" id="recNextBtn" onclick="changeLedgerPage('receiving', 1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-sky-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+      Forward &rarr;
+    </button>
+  </div>
+</div>
+
         </div>
 
         <!-- WITHDRAWAL TABLE -->
@@ -879,7 +893,19 @@
             </thead>
             <tbody id="withdrawalTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-700/50 text-xs sm:text-sm"></tbody>
           </table>
-        </div>
+       <!-- Withdrawal Pagination Controls -->
+<div id="withdrawalPaginationBar" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-slate-200/40 dark:bg-slate-800/60 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
+  <span id="withdrawalPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0–0 of 0</span>
+  <div class="flex items-center gap-2">
+    <button type="button" id="witPrevBtn" onclick="changeLedgerPage('withdrawal', -1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-amber-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+      &larr; Back
+    </button>
+    <span id="witPageBadge" class="font-mono font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-600 dark:text-amber-300">Page 1 / 1</span>
+    <button type="button" id="witNextBtn" onclick="changeLedgerPage('withdrawal', 1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-amber-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
+      Forward &rarr;
+    </button>
+  </div>
+</div>
       </section>
     </main>
   </div>
@@ -1189,6 +1215,9 @@
     let selectedCalendarDateStr = null;
     let pendingPhotoBase64 = null;
     let pendingPhotoFileName = null;
+    const LEDGER_PAGE_SIZE = 10;
+    let recCurrentPage = 1;
+    let witCurrentPage = 1;
 
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
@@ -1707,11 +1736,25 @@
       renderLedgerTables();
     }
 
-    function renderLedgerTables() {
+    function changeLedgerPage(type, delta) {
+      if (type === 'receiving') {
+        recCurrentPage = Math.max(1, recCurrentPage + delta);
+      } else {
+        witCurrentPage = Math.max(1, witCurrentPage + delta);
+      }
+      renderLedgerTables(false);
+    }
+
+    function renderLedgerTables(resetPage = false) {
+      if (resetPage) {
+        recCurrentPage = 1;
+        witCurrentPage = 1;
+      }
+
       const q = document.getElementById('searchInput').value.toLowerCase().trim();
       const stockFilter = document.getElementById('filterStockStatus').value;
 
-      // Render Receiving Sheet
+      // Render Receiving Sheet (10 rows per page)
       const recBody = document.getElementById('receivingTableBody');
       const filteredRec = receivingList.filter(r => {
         const matchQ =
@@ -1727,10 +1770,28 @@
         return matchQ && matchStock && matchDate;
       });
 
+      const recTotalPages = Math.max(1, Math.ceil(filteredRec.length / LEDGER_PAGE_SIZE));
+      if (recCurrentPage > recTotalPages) recCurrentPage = recTotalPages;
+      const recStart = (recCurrentPage - 1) * LEDGER_PAGE_SIZE;
+      const pagedRec = filteredRec.slice(recStart, recStart + LEDGER_PAGE_SIZE);
+
+      const recPageInfo = document.getElementById('receivingPageInfo');
+      const recPageBadge = document.getElementById('recPageBadge');
+      const recPrevBtn = document.getElementById('recPrevBtn');
+      const recNextBtn = document.getElementById('recNextBtn');
+      if (recPageInfo) {
+        recPageInfo.textContent = filteredRec.length
+          ? `Showing ${recStart + 1}–${Math.min(recStart + LEDGER_PAGE_SIZE, filteredRec.length)} of ${filteredRec.length}`
+          : 'Showing 0–0 of 0';
+      }
+      if (recPageBadge) recPageBadge.textContent = `Page ${recCurrentPage} / ${recTotalPages}`;
+      if (recPrevBtn) recPrevBtn.disabled = recCurrentPage <= 1;
+      if (recNextBtn) recNextBtn.disabled = recCurrentPage >= recTotalPages;
+
       if (filteredRec.length === 0) {
         recBody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500">Walang nakitang record sa Receiving Sheet.</td></tr>`;
       } else {
-        recBody.innerHTML = filteredRec.map(r => {
+        recBody.innerHTML = pagedRec.map(r => {
           const safeId = escapeHtml(r.receiptId);
           const hasPhoto = r.photoLink && r.photoLink.startsWith('https://');
           const photoHtml = hasPhoto
@@ -1792,10 +1853,28 @@
         return matchQ && matchDate;
       });
 
+      const witTotalPages = Math.max(1, Math.ceil(filteredWit.length / LEDGER_PAGE_SIZE));
+      if (witCurrentPage > witTotalPages) witCurrentPage = witTotalPages;
+      const witStart = (witCurrentPage - 1) * LEDGER_PAGE_SIZE;
+      const pagedWit = filteredWit.slice(witStart, witStart + LEDGER_PAGE_SIZE);
+
+      const witPageInfo = document.getElementById('withdrawalPageInfo');
+      const witPageBadge = document.getElementById('witPageBadge');
+      const witPrevBtn = document.getElementById('witPrevBtn');
+      const witNextBtn = document.getElementById('witNextBtn');
+      if (witPageInfo) {
+        witPageInfo.textContent = filteredWit.length
+          ? `Showing ${witStart + 1}–${Math.min(witStart + LEDGER_PAGE_SIZE, filteredWit.length)} of ${filteredWit.length}`
+          : 'Showing 0–0 of 0';
+      }
+      if (witPageBadge) witPageBadge.textContent = `Page ${witCurrentPage} / ${witTotalPages}`;
+      if (witPrevBtn) witPrevBtn.disabled = witCurrentPage <= 1;
+      if (witNextBtn) witNextBtn.disabled = witCurrentPage >= witTotalPages;
+
       if (filteredWit.length === 0) {
         witBody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500">Walang nakitang record sa Withdrawal Sheet.</td></tr>`;
       } else {
-        witBody.innerHTML = filteredWit.map(w => {
+        witBody.innerHTML = pagedWit.map(w => {
           const safeId = escapeHtml(w.withdrawalId);
           const hasPhoto = w.itemPhotoLink && w.itemPhotoLink.startsWith('https://');
           const photoHtml = hasPhoto
@@ -1899,8 +1978,10 @@
 
     function selectCalendarDate(dateStr) {
       selectedCalendarDateStr = dateStr;
+      recCurrentPage = 1;
+      witCurrentPage = 1;
       renderCalendar();
-      renderLedgerTables();
+      renderLedgerTables(false);
 
       document.getElementById('selectedDateTitle').textContent = `Warehouse Activity on ${dateStr}`;
       document.getElementById('clearDateFilterBtn').classList.remove('hidden');
@@ -1936,8 +2017,10 @@
       document.getElementById('selectedDateTitle').textContent = 'Select a date to view logs';
       document.getElementById('clearDateFilterBtn').classList.add('hidden');
       document.getElementById('calendarEventList').innerHTML = `<p class="text-slate-500 dark:text-slate-400 italic">Click any highlighted day on the calendar to inspect receiving or withdrawal slips.</p>`;
+      recCurrentPage = 1;
+      witCurrentPage = 1;
       renderCalendar();
-      renderLedgerTables();
+      renderLedgerTables(false);
     }
 
     /* ================= MODALS & SLIPS ================= */
