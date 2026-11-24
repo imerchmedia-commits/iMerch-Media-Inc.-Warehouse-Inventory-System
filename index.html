@@ -7,9 +7,11 @@
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>iMerch Media Inc. | Warehouse Receiving &amp; Withdrawal System</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -52,7 +54,12 @@
       inset: 0;
       z-index: -1;
       pointer-events: none;
-      background-image: url('background2026.jpg');
+      background-image:
+        url('warehousebackground.jpg'),
+        url('warehousebackground.png'),
+        url('warehousebackground.webp'),
+        url('warehousebackground'),
+        url('background2026.jpg');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -344,10 +351,18 @@
                 <input type="text" id="recAgencySupplier" required placeholder="Enter agency or supplier name" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
               </div>
               <div>
-                <label for="recClient" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
-                  Client <span class="text-rose-500">*</span>
-                </label>
-                <input type="text" id="recClient" required placeholder="Enter client / brand account" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <label for="recClient" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Client <span class="text-rose-500">*</span>
+                  </label>
+                  <button type="button" onclick="openAddClientModal('recClient')" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 cursor-pointer" title="Add New Client">+ Add Client</button>
+                </div>
+                <div class="flex items-center gap-2">
+                  <select id="recClient" required onchange="onClientDropdownChange('recClient')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+                    <option value="">-- Select client --</option>
+                  </select>
+                  <button type="button" onclick="openAddClientModal('recClient')" class="w-10 h-10 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-lg flex items-center justify-center shadow cursor-pointer" title="Add New Client">+</button>
+                </div>
               </div>
             </div>
 
@@ -378,12 +393,63 @@
               </div>
             </div>
 
+            <div class="p-4 rounded-xl bg-sky-500/10 border border-sky-500/25 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <label for="recItemDropdown" class="block text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
+                  Description Dropdown (Polo Shirt, Pop Materials, Cellphone)
+                </label>
+                <button type="button" onclick="openAddNewItemModal('rec')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 flex items-center gap-1 cursor-pointer" title="Add New Item to Dropdown">
+                  <span class="text-sm leading-none font-extrabold">+</span>
+                  <span>Add Item</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select id="recItemDropdown" onchange="onWarehouseItemSelected('rec')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+                  <option value="">-- Select item from dropdown or type custom description below --</option>
+                </select>
+                <button type="button" onclick="openAddNewItemModal('rec')" class="w-11 h-11 shrink-0 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-lg flex items-center justify-center shadow cursor-pointer" title="Add New Warehouse Item">+</button>
+              </div>
+
+              <div id="recPoloOptionsPanel" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label for="recPoloSize" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Sizes Dropdown
+                  </label>
+                  <select id="recPoloSize" onchange="syncUniformDescription('rec')" class="w-full rounded-xl px-3 py-2 text-sm glass-input font-medium">
+                    <option value="">-- Select Size --</option>
+                    <option value="Extra Small">Extra Small</option>
+                    <option value="Small">Small</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Large">Large</option>
+                    <option value="XL">XL</option>
+                    <option value="2XL">2XL</option>
+                    <option value="3XL">3XL</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="recPoloColor" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Color Dropdown
+                  </label>
+                  <select id="recPoloColor" onchange="syncUniformDescription('rec')" class="w-full rounded-xl px-3 py-2 text-sm glass-input font-medium">
+                    <option value="">-- Select Color --</option>
+                    <option value="White">White</option>
+                    <option value="Green">Green</option>
+                    <option value="Navy Blue">Navy Blue</option>
+                    <option value="Maroon">Maroon</option>
+                    <option value="Sea Foam">Sea Foam</option>
+                    <option value="Emerald Green">Emerald Green</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label for="recDescription" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
                   Description <span class="text-rose-500">*</span>
                 </label>
-                <textarea id="recDescription" rows="2" required placeholder="Item name, size, SKU, packaging details" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
+                <textarea id="recDescription" rows="2" required placeholder="Auto-filled from dropdown or type item name, size, SKU" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
               </div>
               <div>
                 <label for="recRemarks" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
@@ -527,10 +593,18 @@
                 <input type="text" id="witCoordinator" required placeholder="Assigned coordinator" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
               </div>
               <div>
-                <label for="witClient" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
-                  Client <span class="text-rose-500">*</span>
-                </label>
-                <input type="text" id="witClient" required placeholder="Client account" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+                <div class="flex items-center justify-between gap-2 mb-1.5">
+                  <label for="witClient" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Client <span class="text-rose-500">*</span>
+                  </label>
+                  <button type="button" onclick="openAddClientModal('witClient')" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 cursor-pointer" title="Add New Client">+ Add</button>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <select id="witClient" required onchange="onClientDropdownChange('witClient')" class="w-full rounded-xl px-3 py-2.5 text-sm glass-input font-medium">
+                    <option value="">-- Select client --</option>
+                  </select>
+                  <button type="button" onclick="openAddClientModal('witClient')" class="w-10 h-10 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-base flex items-center justify-center shadow cursor-pointer" title="Add New Client">+</button>
+                </div>
               </div>
             </div>
 
@@ -558,6 +632,57 @@
                   Unit <span class="text-rose-500">*</span>
                 </label>
                 <input type="text" id="witUnit" required placeholder="pcs / boxes" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <label for="witItemDropdown" class="block text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                  Description Dropdown (Uniformed Warehouse Item)
+                </label>
+                <button type="button" onclick="openAddNewItemModal('wit')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 flex items-center gap-1 cursor-pointer" title="Add New Item to Dropdown">
+                  <span class="text-sm leading-none font-extrabold">+</span>
+                  <span>Add Item</span>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <select id="witItemDropdown" onchange="onWarehouseItemSelected('wit')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+                  <option value="">-- Select item from dropdown or auto-filled from stock --</option>
+                </select>
+                <button type="button" onclick="openAddNewItemModal('wit')" class="w-11 h-11 shrink-0 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-lg flex items-center justify-center shadow cursor-pointer" title="Add New Warehouse Item">+</button>
+              </div>
+
+              <div id="witPoloOptionsPanel" class="hidden grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label for="witPoloSize" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Sizes Dropdown
+                  </label>
+                  <select id="witPoloSize" onchange="syncUniformDescription('wit')" class="w-full rounded-xl px-3 py-2 text-sm glass-input font-medium">
+                    <option value="">-- Select Size --</option>
+                    <option value="Extra Small">Extra Small</option>
+                    <option value="Small">Small</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Large">Large</option>
+                    <option value="XL">XL</option>
+                    <option value="2XL">2XL</option>
+                    <option value="3XL">3XL</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="witPoloColor" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Color Dropdown
+                  </label>
+                  <select id="witPoloColor" onchange="syncUniformDescription('wit')" class="w-full rounded-xl px-3 py-2 text-sm glass-input font-medium">
+                    <option value="">-- Select Color --</option>
+                    <option value="White">White</option>
+                    <option value="Green">Green</option>
+                    <option value="Navy Blue">Navy Blue</option>
+                    <option value="Maroon">Maroon</option>
+                    <option value="Sea Foam">Sea Foam</option>
+                    <option value="Emerald Green">Emerald Green</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -667,6 +792,27 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- PER-CLIENT KPIs & EXCEL EXPORT -->
+      <section class="glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-200/60 dark:border-slate-700/60">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold">Client Warehouse KPIs &amp; Excel Export</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Total Receiving (Stock In), Delivery / Available Stock, at Withdrawal (Stock Out) ng bawat client
+            </p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="exportClientSelect" onchange="renderClientKpiSummary()" class="rounded-xl px-3 py-2 text-xs sm:text-sm glass-input font-semibold">
+              <option value="ALL">All Clients (Summary)</option>
+            </select>
+            <button type="button" onclick="exportClientExcel()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow cursor-pointer">
+              Export Excel (.xlsx)
+            </button>
+          </div>
+        </div>
+        <div id="clientKpiGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
       </section>
 
       <!-- Lower Workspace: Online Inventory & Withdrawal Logs -->
@@ -956,9 +1102,74 @@
     </div>
   </div>
 
+  <!-- ADD NEW ITEM MODAL (+ BUTTON) -->
+  <div id="addNewItemModal" onclick="closeAddNewItemModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 p-4 flex items-center justify-center">
+    <div onclick="event.stopPropagation()" class="w-full max-w-md glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Add New Warehouse Item</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Madadagdag agad sa Description Dropdown</p>
+        </div>
+        <button type="button" onclick="closeAddNewItemModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 cursor-pointer">X</button>
+      </div>
+      <form id="addNewItemForm" onsubmit="handleAddNewItemSubmit(event)" class="space-y-3.5">
+        <div>
+          <label for="newItemCategory" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+            Category / Group <span class="text-rose-500">*</span>
+          </label>
+          <select id="newItemCategory" required class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+            <option value="Pop Materials">Pop Materials</option>
+            <option value="Polo Shirt">Polo Shirt</option>
+            <option value="Cellphone">Cellphone</option>
+          </select>
+        </div>
+        <div>
+          <label for="newItemName" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+            Item Name / Description <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="newItemName" required placeholder="Enter new item name" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+        </div>
+        <div>
+          <label for="newItemDefaultUnit" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+            Default Unit (Optional)
+          </label>
+          <input type="text" id="newItemDefaultUnit" placeholder="e.g., pcs, boxes, rolls, units" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeAddNewItemModal()" class="px-4 py-2 rounded-xl text-xs font-semibold glass-input cursor-pointer">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow cursor-pointer">Save to Dropdown</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD NEW CLIENT MODAL (+ BUTTON) -->
+  <div id="addClientModal" onclick="closeAddClientModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 p-4 flex items-center justify-center">
+    <div onclick="event.stopPropagation()" class="w-full max-w-md glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">Add New Client</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Madadagdag agad sa Client Dropdown &amp; KPIs</p>
+        </div>
+        <button type="button" onclick="closeAddClientModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 cursor-pointer">X</button>
+      </div>
+      <form id="addClientForm" onsubmit="handleAddClientSubmit(event)" class="space-y-3.5">
+        <div>
+          <label for="newClientName" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+            Client Name <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="newClientName" required placeholder="e.g., NEW CLIENT NAME" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input uppercase" />
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeAddClientModal()" class="px-4 py-2 rounded-xl text-xs font-semibold glass-input cursor-pointer">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow cursor-pointer">Add Client</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <script>
     // PALITAN ITO NG DEPLOYED GOOGLE APPS SCRIPT WEB APP URL MO
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9y1f8v4hza3mZl7ubiaAFQi8tb5JtuNU4Fo1dFn9QjSNs2IUFfOzF4iXiZnT36v-j/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsaWsSCZ9LfKGaw-soxmgEoGyZ8cbbQpEEF6WE5RK05r2NmkyVQMPQ0JyuFy-nbGWd/exec';
 
     const STORAGE_KEY_THEME = 'imerch_theme_mode';
     const STORAGE_KEY_TOKEN = 'imerch_wh_session_token';
@@ -982,6 +1193,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       setDefaultDateTime();
+      renderClientDropdowns();
+      renderItemDropdowns();
+      renderClientKpiSummary();
 
       if (getSessionToken()) {
         showSystemUI(getSessionUser());
@@ -1181,6 +1395,8 @@
 
     function refreshAllViews() {
       updateKPIs();
+      renderClientDropdowns();
+      renderClientKpiSummary();
       updateSlipTagDisplay();
       populateWithdrawalItemDropdown();
       renderLedgerTables();
@@ -1825,6 +2041,409 @@
         setTimeout(() => toast.remove(), 220);
       }, 3400);
     }
+  
+    const STORAGE_KEY_CUSTOM_ITEMS = 'imerch_wh_custom_items_v1';
+    const STORAGE_KEY_CUSTOM_CLIENTS = 'imerch_wh_custom_clients_v1';
+
+    const DEFAULT_CLIENTS = [
+      'NUTRIASIA', 'URATEX', 'DELFI', 'TOY WORLD', 'CAMEL', 'SERTA',
+      'IAJ WELLNESS', 'C-JOY', 'CCPI', 'SANICARE', 'BNF ASIA',
+      'LIFESTRONG', 'MANYIJIA', 'FRABELLE', 'THE WOW GROUP', 'COLGATE-PALMOLIVE'
+    ];
+
+    const DEFAULT_CATALOG = {
+      'Polo Shirt': [
+        { name: 'Polo Shirt', unit: 'pcs', isPolo: true }
+      ],
+      'Pop Materials': [
+        { name: 'WOW SAMPLER PACK BANDLING STICKER ( SILVER SWAN)', unit: 'pcs' },
+        { name: 'SILVER SWAN DOBLE BUENAS ( Save 8 )Stickers', unit: 'pcs' },
+        { name: 'WOW SAMPLER PACK BANDLING STICKER ( DATU PUTI )', unit: 'pcs' },
+        { name: 'METOTAPE', unit: 'rolls' },
+        { name: 'PACKAGING TAPE ( 2")', unit: 'rolls' },
+        { name: 'HFCO DUO PRI PROMO SAVE 10 STICKER', unit: 'pcs' },
+        { name: 'BIG SAVINGS STICKER', unit: 'pcs' },
+        { name: 'LOCALLY ACRYLIC PHOTO FRAME AND PHOTO PAPER', unit: 'sets' },
+        { name: 'PENTEL PEN - BLACK', unit: 'pcs' },
+        { name: 'MANG TOMAS CROSSMERCH WIRE TRAY', unit: 'pcs' },
+        { name: 'INK BLACK', unit: 'bottles' },
+        { name: 'SCOTCH TAPE ( 1" )', unit: 'rolls' },
+        { name: 'UFC FUNCHOW HANGER ( HARIZONTAL)', unit: 'pcs' },
+        { name: 'SWERTE PACK SCHEME #1', unit: 'pcs' },
+        { name: 'SWERTE PACK SCHEME #3', unit: 'pcs' },
+        { name: 'POLYBAG 250MM X 430MM ( SWERTE PACK)', unit: 'pcs' },
+        { name: 'STAPLER', unit: 'pcs' },
+        { name: 'STAPLER WIRE BOX', unit: 'boxes' },
+        { name: 'SILVER SWAN SUKANG PUTI STICKERS # 862', unit: 'pcs' },
+        { name: 'SILVER SWAN SOY SAUCE STICKERS # 831', unit: 'pcs' },
+        { name: 'HEADER 2pcs SS SOY SAUCE 2L + 1pc HOT SAUCE ( 1800 )', unit: 'pcs' },
+        { name: 'HEADER 2pcs SS SUKANG PUTI 1L FIDEL SALT 250g ( 1824 )', unit: 'pcs' },
+        { name: 'HEADER 2pcs SS SUKANG PUTI 1L FIDEL SALT 500g ( 1855 )', unit: 'pcs' },
+        { name: 'STICKERS 18 PLATES 7.5CM ( YELLOW )', unit: 'pcs' },
+        { name: 'STICKERS 18 PLATES 12.5CM ( BLUE )', unit: 'pcs' },
+        { name: 'UFC SS TACBINS NOV.2022', unit: 'pcs' },
+        { name: 'LANMARK TACBINS ( PAPA KETCHUP )', unit: 'pcs' },
+        { name: 'CADDY BOX ( SILVER SWAN GREEN )', unit: 'pcs' },
+        { name: 'SILVER SWAN SULIT PACK STICKER ( Roll Tape )', unit: 'rolls' },
+        { name: 'POLLY BAG 165 X 490MM ( 2023 )', unit: 'pcs' },
+        { name: 'POLLY BAG 12 X 18( 2023 )', unit: 'pcs' },
+        { name: 'WOW SARAP TACBIN ( PUREGOLD )', unit: 'pcs' },
+        { name: 'WOW SARAP SHELF FRAME ( ROBINSONS )', unit: 'pcs' },
+        { name: 'SCISSORS', unit: 'pcs' },
+        { name: 'UFC OVERLOAD TACBIN', unit: 'pcs' },
+        { name: 'SILVER SWAN CADDY BOX ( RED )', unit: 'pcs' },
+        { name: 'UFC TACBIN INSERT', unit: 'pcs' },
+        { name: 'UFC BAGOONG TACBIN', unit: 'pcs' },
+        { name: 'GREEN ALWAYS PANALO SAVINGS', unit: 'pcs' },
+        { name: 'RED ALWAYS PANALO DEALS', unit: 'pcs' },
+        { name: 'GFCO GOLD GETTERS SHELF TAGS', unit: 'pcs' },
+        { name: 'UFC TAMIS ANGHANG WOBBLER', unit: 'pcs' },
+        { name: 'UFC SPAGHETTI TACTICAL BIN', unit: 'pcs' },
+        { name: 'TAMIS ANGAS BOTTLE NECKERS', unit: 'pcs' },
+        { name: 'COKE HEADER', unit: 'pcs' },
+        { name: 'COKE POLY BAG', unit: 'pcs' },
+        { name: 'UFC ANGAS Shelf PINS', unit: 'pcs' },
+        { name: 'POLY BAG 12 X 18', unit: 'pcs' },
+        { name: 'SIGA BOTTLE NECKER ( RED )', unit: 'pcs' },
+        { name: 'SIGA BOTTLE NECKER ( YELLOW )', unit: 'pcs' },
+        { name: 'GFCO CANOLA DOCTORS MOST RECOMMENDED', unit: 'pcs' },
+        { name: 'UFC GREEN PEAS TRIO PACK STICKER', unit: 'pcs' },
+        { name: 'SOUPER SAVER BUNDLE STICKER', unit: 'pcs' },
+        { name: "CUTTER BLADE 10'S", unit: 'packs' },
+        { name: 'CUTTER BIG - ORDINARY', unit: 'pcs' },
+        { name: 'CHINGU PROJ. PURPLE POUCH SMALL STICKER ( 110x30mm )', unit: 'pcs' },
+        { name: 'CHINGU PROJ. PURPLE POUCH BIG STICKER ( 118.5x100mm )', unit: 'pcs' },
+        { name: 'SAMARK GUN TAGGER', unit: 'pcs' }
+      ],
+      'Cellphone': [
+        { name: 'Samsung A07 LTE 4gb / 128gb', unit: 'units' },
+        { name: 'DITO Sim Card', unit: 'pcs' },
+        { name: 'OPPO A17K ( 2025)', unit: 'units' },
+        { name: 'VIVO Y11', unit: 'units' }
+      ]
+    };
+
+    let targetItemPrefix = 'rec';
+    let targetClientSelectId = 'recClient';
+
+    function getAllClients() {
+      const set = new Set(DEFAULT_CLIENTS.map(c => c.toUpperCase()));
+      try {
+        const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_CLIENTS) || '[]');
+        if (Array.isArray(custom)) custom.forEach(c => { if (c) set.add(String(c).trim().toUpperCase()); });
+      } catch (e) {}
+      receivingList.forEach(r => { if (r.client) set.add(String(r.client).trim().toUpperCase()); });
+      withdrawalList.forEach(w => { if (w.client) set.add(String(w.client).trim().toUpperCase()); });
+      return Array.from(set);
+    }
+
+    function renderClientDropdowns(selectedRec = '', selectedWit = '') {
+      const clients = getAllClients();
+      const curRec = selectedRec || document.getElementById('recClient')?.value || '';
+      const curWit = selectedWit || document.getElementById('witClient')?.value || '';
+      const curExp = document.getElementById('exportClientSelect')?.value || 'ALL';
+
+      const recSel = document.getElementById('recClient');
+      const witSel = document.getElementById('witClient');
+      const expSel = document.getElementById('exportClientSelect');
+
+      if (recSel) {
+        recSel.innerHTML = '<option value="">-- Select client --</option>' + clients.map(c =>
+          `<option value="${escapeHtml(c)}"${c === curRec ? ' selected' : ''}>${escapeHtml(c)}</option>`
+        ).join('');
+      }
+      if (witSel) {
+        witSel.innerHTML = '<option value="">-- Select client --</option>' + clients.map(c =>
+          `<option value="${escapeHtml(c)}"${c === curWit ? ' selected' : ''}>${escapeHtml(c)}</option>`
+        ).join('');
+      }
+      if (expSel) {
+        expSel.innerHTML = '<option value="ALL">All Clients (Summary)</option>' + clients.map(c =>
+          `<option value="${escapeHtml(c)}"${c === curExp ? ' selected' : ''}>${escapeHtml(c)}</option>`
+        ).join('');
+      }
+    }
+
+    function onClientDropdownChange(selectId) {
+      const sel = document.getElementById(selectId);
+      if (sel && sel.value) renderClientKpiSummary();
+    }
+
+    function openAddClientModal(selectId) {
+      targetClientSelectId = selectId || 'recClient';
+      document.getElementById('addClientForm').reset();
+      document.getElementById('addClientModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('newClientName').focus(), 50);
+    }
+
+    function closeAddClientModal() {
+      document.getElementById('addClientModal').classList.add('hidden');
+    }
+
+    function handleAddClientSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newClientName').value.trim().toUpperCase();
+      if (!name) return;
+
+      let custom = [];
+      try {
+        custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_CLIENTS) || '[]');
+        if (!Array.isArray(custom)) custom = [];
+      } catch (err) { custom = []; }
+
+      if (!custom.includes(name)) {
+        custom.push(name);
+        localStorage.setItem(STORAGE_KEY_CUSTOM_CLIENTS, JSON.stringify(custom));
+      }
+
+      if (targetClientSelectId === 'witClient') {
+        renderClientDropdowns('', name);
+      } else {
+        renderClientDropdowns(name, '');
+      }
+      closeAddClientModal();
+      renderClientKpiSummary();
+      showToast(`Client "${name}" added to dropdown.`, 'success');
+    }
+
+    function getMergedCatalog() {
+      const merged = {
+        'Polo Shirt': [...DEFAULT_CATALOG['Polo Shirt']],
+        'Pop Materials': [...DEFAULT_CATALOG['Pop Materials']],
+        'Cellphone': [...DEFAULT_CATALOG['Cellphone']]
+      };
+      try {
+        const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ITEMS) || '[]');
+        if (Array.isArray(custom)) {
+          custom.forEach(item => {
+            const cat = merged[item.category] ? item.category : 'Pop Materials';
+            if (item && item.name && !merged[cat].some(x => x.name.toLowerCase() === item.name.toLowerCase())) {
+              merged[cat].push({ name: item.name, unit: item.unit || 'pcs', isPolo: cat === 'Polo Shirt' });
+            }
+          });
+        }
+      } catch (e) {}
+      return merged;
+    }
+
+    function renderItemDropdowns(selectedRec = '', selectedWit = '') {
+      const catalog = getMergedCatalog();
+      ['rec', 'wit'].forEach(prefix => {
+        const sel = document.getElementById(prefix + 'ItemDropdown');
+        if (!sel) return;
+        const targetVal = prefix === 'rec' ? selectedRec : selectedWit;
+        let html = '<option value="">-- Select item from dropdown or type custom description below --</option>';
+        Object.keys(catalog).forEach(cat => {
+          html += `<optgroup label="${escapeHtml(cat)}">`;
+          catalog[cat].forEach(item => {
+            const val = `${cat}::${item.name}::${item.unit || ''}::${item.isPolo ? '1' : '0'}`;
+            const isSel = targetVal && val === targetVal ? ' selected' : '';
+            html += `<option value="${escapeHtml(val)}"${isSel}>${escapeHtml(item.name)}</option>`;
+          });
+          html += '</optgroup>';
+        });
+        sel.innerHTML = html;
+      });
+    }
+
+    function onWarehouseItemSelected(prefix) {
+      const raw = document.getElementById(prefix + 'ItemDropdown')?.value || '';
+      const poloPanel = document.getElementById(prefix + 'PoloOptionsPanel');
+      if (!raw) {
+        if (poloPanel) { poloPanel.classList.add('hidden'); poloPanel.classList.remove('grid'); }
+        return;
+      }
+      const [cat, itemName, defaultUnit, isPoloFlag] = raw.split('::');
+      const isPolo = isPoloFlag === '1' || cat === 'Polo Shirt' || /polo\s*shirt/i.test(itemName);
+      if (poloPanel) {
+        if (isPolo) { poloPanel.classList.remove('hidden'); poloPanel.classList.add('grid'); }
+        else {
+          poloPanel.classList.add('hidden'); poloPanel.classList.remove('grid');
+          const s = document.getElementById(prefix + 'PoloSize'); if (s) s.value = '';
+          const c = document.getElementById(prefix + 'PoloColor'); if (c) c.value = '';
+        }
+      }
+      const unitInput = document.getElementById(prefix + 'Unit');
+      if (defaultUnit && unitInput && !unitInput.value.trim()) unitInput.value = defaultUnit;
+      syncUniformDescription(prefix);
+    }
+
+    function syncUniformDescription(prefix) {
+      const raw = document.getElementById(prefix + 'ItemDropdown')?.value || '';
+      if (!raw) return;
+      const [, itemName, , isPoloFlag] = raw.split('::');
+      const sizeVal = document.getElementById(prefix + 'PoloSize')?.value.trim() || '';
+      const colorVal = document.getElementById(prefix + 'PoloColor')?.value.trim() || '';
+      const parts = [itemName];
+      if (isPoloFlag === '1' || sizeVal || colorVal) {
+        if (sizeVal) parts.push('Size: ' + sizeVal);
+        if (colorVal) parts.push('Color: ' + colorVal);
+      }
+      const descEl = document.getElementById(prefix + 'Description');
+      if (descEl) descEl.value = parts.join(' - ');
+    }
+
+    function openAddNewItemModal(prefix) {
+      targetItemPrefix = prefix || 'rec';
+      document.getElementById('addNewItemForm').reset();
+      document.getElementById('addNewItemModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('newItemName').focus(), 50);
+    }
+
+    function closeAddNewItemModal() {
+      document.getElementById('addNewItemModal').classList.add('hidden');
+    }
+
+    function handleAddNewItemSubmit(e) {
+      e.preventDefault();
+      const category = document.getElementById('newItemCategory').value;
+      const name = document.getElementById('newItemName').value.trim();
+      const unit = document.getElementById('newItemDefaultUnit').value.trim() || 'pcs';
+      if (!name) return;
+
+      let customList = [];
+      try {
+        customList = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ITEMS) || '[]');
+        if (!Array.isArray(customList)) customList = [];
+      } catch (err) { customList = []; }
+
+      customList.push({ category, name, unit });
+      localStorage.setItem(STORAGE_KEY_CUSTOM_ITEMS, JSON.stringify(customList));
+
+      const selectedVal = `${category}::${name}::${unit}::${category === 'Polo Shirt' ? '1' : '0'}`;
+      if (targetItemPrefix === 'wit') {
+        renderItemDropdowns('', selectedVal);
+      } else {
+        renderItemDropdowns(selectedVal, '');
+      }
+      onWarehouseItemSelected(targetItemPrefix);
+      const unitInput = document.getElementById(targetItemPrefix + 'Unit');
+      if (unit && unitInput) unitInput.value = unit;
+
+      closeAddNewItemModal();
+      showToast(`Added "${name}" to ${category} dropdown.`, 'success');
+    }
+
+    function computeClientStats() {
+      const stats = {};
+      getAllClients().forEach(c => {
+        stats[c] = { client: c, receivingQty: 0, deliveryQty: 0, withdrawalQty: 0, receiptCount: 0, withdrawalCount: 0 };
+      });
+      receivingList.forEach(r => {
+        const c = (r.client || 'UNSPECIFIED').trim().toUpperCase();
+        if (!stats[c]) stats[c] = { client: c, receivingQty: 0, deliveryQty: 0, withdrawalQty: 0, receiptCount: 0, withdrawalCount: 0 };
+        stats[c].receivingQty += Number(r.quantityReceived) || 0;
+        stats[c].deliveryQty += Number(r.remainingStock) || 0;
+        stats[c].receiptCount += 1;
+      });
+      withdrawalList.forEach(w => {
+        const c = (w.client || 'UNSPECIFIED').trim().toUpperCase();
+        if (!stats[c]) stats[c] = { client: c, receivingQty: 0, deliveryQty: 0, withdrawalQty: 0, receiptCount: 0, withdrawalCount: 0 };
+        stats[c].withdrawalQty += Number(w.quantityWithdrawn) || 0;
+        stats[c].withdrawalCount += 1;
+      });
+      return stats;
+    }
+
+    function renderClientKpiSummary() {
+      const stats = computeClientStats();
+      const selected = document.getElementById('exportClientSelect')?.value || 'ALL';
+      const grid = document.getElementById('clientKpiGrid');
+      if (!grid) return;
+
+      const list = selected === 'ALL'
+        ? Object.values(stats).filter(s => s.receivingQty > 0 || s.withdrawalQty > 0 || DEFAULT_CLIENTS.includes(s.client)).slice(0, 8)
+        : [stats[selected]].filter(Boolean);
+
+      grid.innerHTML = list.map(s => `
+        <div class="p-4 rounded-xl bg-slate-200/45 dark:bg-slate-800/60 border border-slate-300/50 dark:border-slate-700/60 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-extrabold tracking-wide text-sky-600 dark:text-sky-300 truncate">${escapeHtml(s.client)}</span>
+            <span class="text-[10px] font-mono text-slate-400">${s.receiptCount} IN / ${s.withdrawalCount} OUT</span>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 text-center pt-1">
+            <div class="p-1.5 rounded-lg bg-sky-500/10">
+              <div class="text-[10px] uppercase text-slate-400">Receiving</div>
+              <div class="text-xs font-mono font-bold text-sky-400">${s.receivingQty.toLocaleString()}</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-emerald-500/10">
+              <div class="text-[10px] uppercase text-slate-400">Delivery</div>
+              <div class="text-xs font-mono font-bold text-emerald-400">${s.deliveryQty.toLocaleString()}</div>
+            </div>
+            <div class="p-1.5 rounded-lg bg-amber-500/10">
+              <div class="text-[10px] uppercase text-slate-400">Withdrawal</div>
+              <div class="text-xs font-mono font-bold text-amber-400">${s.withdrawalQty.toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function exportClientExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Excel library (SheetJS) not loaded yet. Refresh page.', 'error');
+        return;
+      }
+      const selectedClient = (document.getElementById('exportClientSelect')?.value || 'ALL').trim().toUpperCase();
+      const recRows = (selectedClient === 'ALL'
+        ? receivingList
+        : receivingList.filter(r => (r.client || '').trim().toUpperCase() === selectedClient)
+      ).map(r => ({
+        'Receipt ID': r.receiptId,
+        'Client': r.client,
+        'Agency/Supplier': r.agencySupplier,
+        'Date': r.date,
+        'Time': r.time,
+        'Description': r.description,
+        'Quantity Received': r.quantityReceived,
+        'Remaining Stock': r.remainingStock,
+        'Unit': r.unit,
+        'Remarks': r.remarks,
+        'Delivered By': r.deliveredBy,
+        'Plate #': r.plateNo,
+        'Checked/Received By': r.checkedBy,
+        'Approved By': r.approvedBy,
+        'ASN Note': r.asnNote
+      }));
+
+      const witRows = (selectedClient === 'ALL'
+        ? withdrawalList
+        : withdrawalList.filter(w => (w.client || '').trim().toUpperCase() === selectedClient)
+      ).map(w => ({
+        'Withdrawal ID': w.withdrawalId,
+        'Ref Receipt ID': w.refReceiptId,
+        'Client': w.client,
+        'Outlet/Area': w.outletArea,
+        'Coordinator': w.coordinator,
+        'Date': w.date,
+        'Time': w.time,
+        'Description': w.description,
+        'Quantity Withdrawn': w.quantityWithdrawn,
+        'Unit': w.unit,
+        'Remarks': w.remarks,
+        'Requested By': w.requestedBy,
+        'Noted By': w.notedBy,
+        'Released By': w.releasedBy
+      }));
+
+      const stats = computeClientStats();
+      const kpiRows = (selectedClient === 'ALL' ? Object.values(stats) : [stats[selectedClient]].filter(Boolean)).map(s => ({
+        'Client': s.client,
+        'Total Receiving (Stock In)': s.receivingQty,
+        'Delivery / Available Stock': s.deliveryQty,
+        'Total Withdrawal (Stock Out)': s.withdrawalQty
+      }));
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kpiRows.length ? kpiRows : [{}]), 'Client KPIs');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(recRows.length ? recRows : [{}]), 'Receiving');
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(witRows.length ? witRows : [{}]), 'Withdrawals');
+
+      const safeFile = selectedClient === 'ALL' ? 'All_Clients' : selectedClient.replace(/[^A-Z0-9_-]/gi, '_');
+      XLSX.writeFile(wb, `iMerch_Warehouse_${safeFile}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast(`Exported Excel for ${selectedClient === 'ALL' ? 'All Clients' : selectedClient}.`, 'success');
+    }
+
   </script>
 </body>
 </html>
