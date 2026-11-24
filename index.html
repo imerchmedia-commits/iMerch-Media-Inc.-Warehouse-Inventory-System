@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <title>iMerch Media Inc. | Warehouse Receiving &amp; Withdrawal System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg-base: #0b1324;
+      --panel-bg: rgba(255, 255, 255, 0.90);
+      --panel-border: rgba(203, 213, 225, 0.85);
+      --panel-shadow: 0 8px 28px rgba(15, 23, 42, 0.14);
+      --input-bg: #ffffff;
+      --wallpaper-scrim: linear-gradient(180deg, rgba(241, 245, 249, 0.78) 0%, rgba(226, 232, 240, 0.86) 100%);
+    }
+
+    html.dark {
+      --bg-base: #050914;
+      --panel-bg: rgba(10, 17, 34, 0.84);
+      --panel-border: rgba(56, 189, 248, 0.24);
+      --panel-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+      --input-bg: rgba(15, 23, 42, 0.92);
+      --wallpaper-scrim: linear-gradient(180deg, rgba(5, 10, 22, 0.68) 0%, rgba(7, 13, 28, 0.82) 100%);
+    }
+
+    body {
+      background-color: var(--bg-base);
+      min-height: 100vh;
+    }
+
+    #systemWallpaperLayer {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: url('background2026.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    #systemWallpaperLayer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--wallpaper-scrim);
+    }
+
+    .glass-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--panel-shadow);
+    }
+
+    .glass-input {
+      background: var(--input-bg);
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .glass-input:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      body, #systemWallpaperLayer {
+        background: #ffffff !important;
+        background-image: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      #systemWallpaperLayer::after {
+        display: none !important;
+      }
+      .active-print-modal, .active-print-modal * {
+        visibility: visible;
+      }
+      .active-print-modal {
+        position: fixed !important;
+        inset: 0 !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+        display: block !important;
+      }
+      #receivingPrintableSheet, #withdrawalPrintableSheet {
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 10mm !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800 dark:text-slate-100 antialiased selection:bg-sky-500 selection:text-white">
+
+  <div id="systemWallpaperLayer" aria-hidden="true"></div>
+  <div id="toastContainer" class="fixed top-5 right-5 z-[60] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-md glass-panel rounded-3xl p-6 sm:p-8 space-y-6 relative overflow-hidden">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <img id="loginBrandLogo" src="imerchlogowhite1.png" alt="iMerch Media Inc." class="h-8 sm:h-9 w-auto object-contain shrink-0" />
+          <div class="h-5 w-px bg-slate-300/70 dark:bg-slate-700/80"></div>
+          <span class="text-[11px] font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-500/25">
+            Warehouse Login
+          </span>
+        </div>
+
+        <button type="button" onclick="toggleTheme()" class="p-2 rounded-xl glass-input hover:border-sky-400 transition cursor-pointer" title="Toggle Dark / Light Mode">
+          <svg class="w-4 h-4 text-amber-400 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <svg class="w-4 h-4 text-slate-700 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+
+      <div>
+        <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Sign In</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">iMerch Media Inc. • Warehouse Receiving &amp; Withdrawal System</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4" autocomplete="on">
+        <div>
+          <label for="loginUsername" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">Username</label>
+          <input type="text" id="loginUsername" name="username" required autocomplete="username" placeholder="ron.sarmenta@imerchmedia.net" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+        </div>
+
+        <div>
+          <label for="loginPassword" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">Password</label>
+          <div class="relative">
+            <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Enter password" class="w-full rounded-xl px-3.5 py-2.5 pr-11 text-sm glass-input font-mono" />
+            <button type="button" onclick="toggleLoginPassword()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-sky-400 transition cursor-pointer" title="Show / Hide Password">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="loginErrorMsg" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-xs font-medium text-rose-600 dark:text-rose-300"></div>
+
+        <button type="submit" id="loginBtn" class="w-full py-2.5 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>Sign In</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN SYSTEM SHELL -->
+  <div id="mainSystemShell" class="hidden">
+    <header class="sticky top-0 z-30 glass-panel border-x-0 border-t-0 rounded-none">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <img id="headerBrandLogo" src="imerchlogowhite1.png" alt="iMerch Media Inc." class="h-8 sm:h-9 w-auto object-contain shrink-0" />
+          <div class="hidden sm:block h-6 w-px bg-slate-300 dark:bg-slate-700"></div>
+          <div class="truncate">
+            <div class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-bold tracking-tight text-slate-800 dark:text-slate-100 truncate">
+                iMerch Warehouse System
+              </span>
+              <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-500/25">
+                Inventory &amp; Slips
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Receiving Sheet, Stock Deduction, Withdrawal Slip &amp; Photo Log</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <span id="sessionUserLabel" class="hidden lg:inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20"></span>
+
+          <button onclick="loadWarehouseData()" class="p-2.5 rounded-xl glass-input hover:border-sky-400 transition cursor-pointer" title="Refresh Google Sheets">
+            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+
+          <button onclick="toggleTheme()" class="p-2.5 rounded-xl glass-input hover:border-sky-400 transition cursor-pointer" title="Toggle Dark / Light Mode">
+            <svg class="w-4 h-4 text-amber-400 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <svg class="w-4 h-4 text-slate-700 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+          </button>
+
+          <button onclick="handleLogout()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 border border-rose-500/25 transition cursor-pointer" title="Sign Out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- KPI Summary Cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Received Batches</p>
+            <p id="kpiBatches" class="text-2xl sm:text-3xl font-extrabold mt-1 font-mono">0</p>
+            <p class="text-[11px] text-sky-600 dark:text-sky-400 mt-1">Series REC-0001+</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-sky-500/15 text-sky-500 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Available Stock Qty</p>
+            <p id="kpiRemainingQty" class="text-2xl sm:text-3xl font-extrabold mt-1 font-mono text-emerald-600 dark:text-emerald-400">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Ready for Withdrawal</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Withdrawn Qty</p>
+            <p id="kpiWithdrawnQty" class="text-2xl sm:text-3xl font-extrabold mt-1 font-mono text-amber-600 dark:text-amber-400">0</p>
+            <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1">Released to Outlets/Clients</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Withdrawal Slips</p>
+            <p id="kpiWithdrawalCount" class="text-2xl sm:text-3xl font-extrabold mt-1 font-mono text-indigo-600 dark:text-indigo-400">0</p>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Series WDR-0001+</p>
+          </div>
+          <div class="w-11 h-11 rounded-2xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Upper Workspace Grid -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column (7 cols): Receiving Tab & Withdrawal Tab -->
+        <div class="lg:col-span-7 glass-panel rounded-2xl p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                Warehouse Receiving &amp; Withdrawal Entry
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Log incoming deliveries with photo/ASN or deduct stock via Withdrawal Slip</p>
+            </div>
+
+            <div class="px-3 py-1.5 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center gap-2">
+              <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400">Slip Ref:</span>
+              <span id="displaySlipTag" class="font-mono font-bold text-sm text-sky-600 dark:text-sky-300">REC-0001</span>
+            </div>
+          </div>
+
+          <!-- 2-TAB BAR: RECEIVING TAB vs WITHDRAWAL TAB -->
+          <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800/80 my-4">
+            <button type="button" id="tabReceiving" onclick="switchWarehouseTab('receiving')" class="py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-sm cursor-pointer">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Receiving Tab (Stock In)</span>
+            </button>
+            <button type="button" id="tabWithdrawal" onclick="switchWarehouseTab('withdrawal')" class="py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+              </svg>
+              <span>Withdrawal Tab (Stock Out)</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: RECEIVING FORM (MATCHING RECEIVING SLIP) -->
+          <form id="receivingForm" onsubmit="handleReceivingSubmit(event)" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="recAgencySupplier" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Agency / Supplier <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="recAgencySupplier" required placeholder="Enter agency or supplier name" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="recClient" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Client <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="recClient" required placeholder="Enter client / brand account" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <label for="recDate" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Date <span class="text-rose-500">*</span>
+                </label>
+                <input type="date" id="recDate" required class="w-full rounded-xl px-3 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="recTime" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Time <span class="text-rose-500">*</span>
+                </label>
+                <input type="time" id="recTime" required class="w-full rounded-xl px-3 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="recQuantity" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Quantity <span class="text-rose-500">*</span>
+                </label>
+                <input type="number" id="recQuantity" step="any" min="0.01" required placeholder="0" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-mono" />
+              </div>
+              <div>
+                <label for="recUnit" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Unit <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="recUnit" required placeholder="pcs / boxes / rolls" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="recDescription" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Description <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="recDescription" rows="2" required placeholder="Item name, size, SKU, packaging details" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
+              </div>
+              <div>
+                <label for="recRemarks" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Remarks
+                </label>
+                <textarea id="recRemarks" rows="2" placeholder="Condition, batch notes, or delivery remarks" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
+              </div>
+            </div>
+
+            <!-- Signatories & Vehicle Details matching bottom of Receiving Slip -->
+            <div class="p-4 rounded-xl bg-slate-200/45 dark:bg-slate-800/55 border border-slate-300/50 dark:border-slate-700/60 space-y-3">
+              <p class="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                Delivery &amp; Warehouse Signatories
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="recDeliveredBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Delivered by (Name / Signature) <span class="text-rose-500">*</span>
+                  </label>
+                  <input type="text" id="recDeliveredBy" required placeholder="Driver / courier full name" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+                </div>
+                <div>
+                  <label for="recPlateNo" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Plate #
+                  </label>
+                  <input type="text" id="recPlateNo" placeholder="e.g., ABC-1234" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input font-mono uppercase" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="recCheckedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Checked / Received by (Warehouse Assistant) <span class="text-rose-500">*</span>
+                  </label>
+                  <input type="text" id="recCheckedBy" required placeholder="Warehouse Assistant name" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+                </div>
+                <div>
+                  <label for="recApprovedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                    Approved By (Warehouse Supervisor) <span class="text-rose-500">*</span>
+                  </label>
+                  <input type="text" id="recApprovedBy" required placeholder="Warehouse Supervisor name" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+                </div>
+              </div>
+
+              <div>
+                <label for="recAsnNote" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                  Note: Attach ASN, if applicable (ASN # / Reference)
+                </label>
+                <input type="text" id="recAsnNote" placeholder="Optional ASN reference number or delivery note" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+              </div>
+            </div>
+
+            <!-- Phone Camera Capture / Image Upload + Live Preview -->
+            <div>
+              <label class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                Item Picture / Signed ASN Photo (Camera or Gallery Upload)
+              </label>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl glass-input border-dashed">
+                <div class="flex flex-wrap items-center gap-2">
+                  <label class="px-3.5 py-2 rounded-lg text-xs font-bold bg-sky-500/15 text-sky-600 dark:text-sky-300 hover:bg-sky-500/25 border border-sky-500/30 cursor-pointer inline-flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Take Photo / Upload</span>
+                    <input type="file" id="recPhotoInput" accept="image/*,.pdf" capture="environment" onchange="previewReceivingPhoto(event)" class="hidden" />
+                  </label>
+                  <span id="recPhotoFileName" class="text-xs text-slate-500 dark:text-slate-400">No photo selected</span>
+                </div>
+                <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium shrink-0">Saves to Google Drive</span>
+              </div>
+
+              <!-- Live Image Preview Box -->
+              <div id="recPhotoPreviewBox" class="hidden mt-3 p-3 rounded-xl bg-slate-900/60 border border-sky-500/30 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <img id="recPhotoPreviewImg" src="" alt="Item Preview" class="w-20 h-20 rounded-lg object-cover border border-slate-600" />
+                  <div>
+                    <p class="text-xs font-bold text-sky-300">Ready to Upload &amp; Display Online</p>
+                    <p id="recPhotoPreviewLabel" class="text-[11px] text-slate-400 mt-0.5"></p>
+                  </div>
+                </div>
+                <button type="button" onclick="clearReceivingPhoto()" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 cursor-pointer">
+                  Remove
+                </button>
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-center justify-end gap-3">
+              <button type="button" onclick="resetReceivingForm()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold glass-input hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition cursor-pointer">
+                Clear Form
+              </button>
+              <button type="submit" id="recSubmitBtn" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 shadow-lg shadow-sky-500/25 flex items-center gap-2 transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Save to Receiving Sheet</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- TAB 2: WITHDRAWAL FORM (DEDUCTS FROM RECEIVED STOCK + SHOWS ITEM PHOTO) -->
+          <form id="withdrawalForm" onsubmit="handleWithdrawalSubmit(event)" class="hidden space-y-4">
+            <!-- Select Received Item Dropdown -->
+            <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+              <label for="witSelectReceived" class="block text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                Select Received Item to Withdraw (Auto-Deducts Stock) <span class="text-rose-500">*</span>
+              </label>
+              <select id="witSelectReceived" required onchange="onSelectReceivedForWithdrawal()" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+                <option value="">-- Choose available item from Receiving Sheet --</option>
+              </select>
+
+              <!-- Selected Item Live Stock & Uploaded Photo Card -->
+              <div id="witSelectedItemCard" class="hidden p-3 rounded-xl bg-slate-900/75 border border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <img id="witItemThumb" src="" alt="Item Photo" onclick="openImageModal(this.src, document.getElementById('witItemTitle').textContent)" class="hidden w-16 h-16 rounded-lg object-cover border border-sky-400/50 cursor-pointer shrink-0" title="Click to enlarge photo" />
+                  <div id="witNoThumbBadge" class="w-16 h-16 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-[10px] text-slate-400 text-center px-1 shrink-0">
+                    No Photo
+                  </div>
+                  <div>
+                    <p id="witItemTitle" class="text-xs sm:text-sm font-bold text-white"></p>
+                    <p id="witItemMeta" class="text-[11px] text-slate-300 mt-0.5"></p>
+                    <p class="text-xs font-mono font-bold text-emerald-400 mt-1">
+                      Available Stock: <span id="witAvailableStockBadge">0</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="witOutletArea" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Outlet / Area <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witOutletArea" required placeholder="Target outlet or area" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witCoordinator" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Coordinator <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witCoordinator" required placeholder="Assigned coordinator" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witClient" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Client <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witClient" required placeholder="Client account" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <label for="witDate" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Date <span class="text-rose-500">*</span>
+                </label>
+                <input type="date" id="witDate" required class="w-full rounded-xl px-3 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witTime" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Time <span class="text-rose-500">*</span>
+                </label>
+                <input type="time" id="witTime" required class="w-full rounded-xl px-3 py-2.5 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witQuantity" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Withdraw Qty <span class="text-rose-500">*</span>
+                </label>
+                <input type="number" id="witQuantity" step="any" min="0.01" required placeholder="0" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-mono" />
+              </div>
+              <div>
+                <label for="witUnit" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Unit <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witUnit" required placeholder="pcs / boxes" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="witDescription" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Description <span class="text-rose-500">*</span>
+                </label>
+                <textarea id="witDescription" rows="2" required placeholder="Item description" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
+              </div>
+              <div>
+                <label for="witRemarks" class="block text-xs font-semibold mb-1.5 text-slate-700 dark:text-slate-300">
+                  Remarks
+                </label>
+                <textarea id="witRemarks" rows="2" placeholder="Dispatch / release notes" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input"></textarea>
+              </div>
+            </div>
+
+            <!-- Signatories matching bottom of Withdrawal Slip -->
+            <div class="p-4 rounded-xl bg-slate-200/45 dark:bg-slate-800/55 border border-slate-300/50 dark:border-slate-700/60 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label for="witRequestedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                  Requested by (Name/Signature) <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witRequestedBy" required placeholder="Requestor name" class="w-full rounded-xl px-3 py-2 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witNotedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                  Noted by (Operation Head) <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witNotedBy" required placeholder="Operation Head name" class="w-full rounded-xl px-3 py-2 text-sm glass-input" />
+              </div>
+              <div>
+                <label for="witReleasedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+                  Checked/Released by (Warehouse Supervisor) <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="witReleasedBy" required placeholder="Warehouse Supervisor" class="w-full rounded-xl px-3 py-2 text-sm glass-input" />
+              </div>
+            </div>
+
+            <div class="pt-2 flex flex-wrap items-center justify-end gap-3">
+              <button type="button" onclick="resetWithdrawalForm()" class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold glass-input hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition cursor-pointer">
+                Clear Form
+              </button>
+              <button type="submit" id="witSubmitBtn" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 shadow-lg shadow-amber-500/25 flex items-center gap-2 transition cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Confirm Withdrawal &amp; Deduct Stock</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Column (5 cols): Warehouse Activity Calendar -->
+        <div class="lg:col-span-5 glass-panel rounded-2xl p-5 sm:p-6 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200/60 dark:border-slate-700/60">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold flex items-center gap-2">
+                  <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Warehouse Activity Calendar
+                </h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Track incoming deliveries &amp; outgoing withdrawals</p>
+              </div>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="changeMonth(-1)" class="p-2 rounded-lg glass-input hover:border-sky-400 transition cursor-pointer" title="Previous Month">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button type="button" onclick="goToToday()" class="px-2.5 py-1.5 rounded-lg glass-input text-xs font-semibold hover:border-sky-400 transition cursor-pointer">
+                  Today
+                </button>
+                <button type="button" onclick="changeMonth(1)" class="p-2 rounded-lg glass-input hover:border-sky-400 transition cursor-pointer" title="Next Month">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between my-3">
+              <h3 id="calendarMonthYear" class="text-sm font-bold text-slate-800 dark:text-slate-100">November 2026</h3>
+              <div class="flex items-center gap-3 text-[11px]">
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Received</span>
+                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Withdrawn</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center"></div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
+            <div class="flex items-center justify-between mb-2">
+              <span id="selectedDateTitle" class="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                Select a date to view logs
+              </span>
+              <button id="clearDateFilterBtn" onclick="clearDateFilter()" class="hidden text-[11px] text-rose-500 hover:underline font-semibold cursor-pointer">
+                Clear Table Filter
+              </button>
+            </div>
+            <div id="calendarEventList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs">
+              <p class="text-slate-500 dark:text-slate-400 italic">Click any highlighted day on the calendar to inspect receiving or withdrawal slips.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lower Workspace: Online Inventory & Withdrawal Logs -->
+      <section class="glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="ledgerTabRec" onclick="switchLedgerView('receiving')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-white shadow cursor-pointer">
+              Receiving Sheet &amp; Live Stock
+            </button>
+            <button type="button" id="ledgerTabWit" onclick="switchLedgerView('withdrawal')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold glass-input text-slate-600 dark:text-slate-300 cursor-pointer">
+              Withdrawal Sheet Logs
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="relative flex-1 sm:w-64">
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input type="text" id="searchInput" oninput="renderLedgerTables()" placeholder="Search ID, client, supplier, item..." class="w-full rounded-xl pl-9 pr-3.5 py-2 text-xs sm:text-sm glass-input" />
+            </div>
+
+            <select id="filterStockStatus" onchange="renderLedgerTables()" class="rounded-xl px-3 py-2 text-xs sm:text-sm glass-input">
+              <option value="ALL">All Stock Status</option>
+              <option value="AVAILABLE">With Available Stock</option>
+              <option value="DEPLETED">Depleted / Out</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RECEIVING TABLE -->
+        <div id="receivingTableWrapper" class="overflow-x-auto rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-200/60 dark:bg-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <th class="py-3.5 px-4">Receipt ID</th>
+                <th class="py-3.5 px-4">Photo / ASN</th>
+                <th class="py-3.5 px-4">Agency/Supplier &amp; Client</th>
+                <th class="py-3.5 px-4">Description &amp; Remarks</th>
+                <th class="py-3.5 px-4">Stock (Rem / In)</th>
+                <th class="py-3.5 px-4">Date &amp; Time</th>
+                <th class="py-3.5 px-4">Signatories</th>
+                <th class="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="receivingTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-700/50 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+
+        <!-- WITHDRAWAL TABLE -->
+        <div id="withdrawalTableWrapper" class="hidden overflow-x-auto rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-200/60 dark:bg-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                <th class="py-3.5 px-4">Withdrawal ID</th>
+                <th class="py-3.5 px-4">Item Photo</th>
+                <th class="py-3.5 px-4">Outlet/Area, Coord &amp; Client</th>
+                <th class="py-3.5 px-4">Description &amp; Remarks</th>
+                <th class="py-3.5 px-4">Qty Withdrawn</th>
+                <th class="py-3.5 px-4">Date &amp; Time</th>
+                <th class="py-3.5 px-4">Signatories</th>
+                <th class="py-3.5 px-4 text-right">Slip</th>
+              </tr>
+            </thead>
+            <tbody id="withdrawalTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-700/50 text-xs sm:text-sm"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- IMAGE LIGHTBOX MODAL -->
+  <div id="imageLightboxModal" onclick="closeImageModal()" class="fixed inset-0 z-50 hidden bg-slate-950/85 p-4 flex items-center justify-center">
+    <div onclick="event.stopPropagation()" class="max-w-2xl w-full glass-panel rounded-2xl p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 id="lightboxCaption" class="text-sm font-bold text-white truncate">Item Attachment</h3>
+        <button type="button" onclick="closeImageModal()" class="px-3 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <img id="lightboxImg" src="" alt="Preview" class="w-full max-h-[75vh] object-contain rounded-xl bg-black/50" />
+    </div>
+  </div>
+
+  <!-- MODAL 1: PRINTABLE RECEIVING SLIP -->
+  <div id="receivingSlipModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 overflow-y-auto p-4 sm:p-8 flex items-start justify-center">
+    <div class="w-full max-w-3xl space-y-4 my-auto">
+      <div class="no-print glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-sky-500"></span>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">Printable Receiving Slip Preview</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-sky-500 to-indigo-600 shadow-lg cursor-pointer">
+            Print Receiving Slip
+          </button>
+          <button onclick="closeSlipModals()" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold glass-input cursor-pointer">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div id="receivingPrintableSheet" class="bg-white text-slate-900 p-6 sm:p-8 border-2 border-slate-900 font-sans">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <img src="imerchlogoblack.png" alt="iMerch Media Inc." class="h-11 w-auto object-contain" />
+          <div class="text-right text-xs font-semibold leading-tight">
+            <p>#493 Halcon St. Brgy. Malamig</p>
+            <p>Mandaluyong City</p>
+            <p id="slipRecNo" class="font-mono font-bold text-sm mt-1">REC-0001</p>
+          </div>
+        </div>
+
+        <h2 class="text-center text-lg font-extrabold uppercase tracking-wider mb-4">RECEIVING SLIP</h2>
+
+        <div class="grid grid-cols-12 gap-2 text-xs font-bold mb-3">
+          <div class="col-span-7 space-y-1.5">
+            <div class="flex items-baseline gap-2">
+              <span class="w-32 shrink-0">AGENCY/SUPPLIER:</span>
+              <span id="slipRecSupplier" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="w-32 shrink-0">CLIENT:</span>
+              <span id="slipRecClient" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+          </div>
+          <div class="col-span-5 space-y-1.5">
+            <div class="flex items-baseline gap-2">
+              <span class="w-12 shrink-0">DATE:</span>
+              <span id="slipRecDate" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="w-12 shrink-0">TIME:</span>
+              <span id="slipRecTime" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+          </div>
+        </div>
+
+        <table class="w-full border-collapse border border-slate-900 text-xs mb-6">
+          <thead>
+            <tr class="font-bold text-center">
+              <th class="border border-slate-900 py-1.5 px-2 w-24">QUANTITY</th>
+              <th class="border border-slate-900 py-1.5 px-2 w-24">UNIT</th>
+              <th class="border border-slate-900 py-1.5 px-2">DESCRIPTION</th>
+              <th class="border border-slate-900 py-1.5 px-2 w-44">REMARKS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="slipRecQty" class="border border-slate-900 py-3 px-2 text-center font-mono font-bold"></td>
+              <td id="slipRecUnit" class="border border-slate-900 py-3 px-2 text-center"></td>
+              <td id="slipRecDesc" class="border border-slate-900 py-3 px-2"></td>
+              <td id="slipRecRemarks" class="border border-slate-900 py-3 px-2"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid grid-cols-3 gap-6 text-xs pt-4">
+          <div>
+            <p class="font-semibold mb-8">Delivered by:</p>
+            <p id="slipRecDelivered" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Name/Signature</p>
+              <p class="mt-1">Plate#: <span id="slipRecPlate" class="inline-block min-w-[90px] border-b border-slate-900 px-1 font-mono"></span></p>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="font-semibold mb-8">Checked/Received by:</p>
+            <p id="slipRecChecked" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Warehouse assistant</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="font-semibold mb-8">Approved by:</p>
+            <p id="slipRecApproved" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Warehouse Supervisor</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-center text-xs font-semibold mt-5">
+          Note: Attach ASN, if applicable <span id="slipRecAsn" class="font-normal"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: PRINTABLE WITHDRAWAL SLIP -->
+  <div id="withdrawalSlipModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 overflow-y-auto p-4 sm:p-8 flex items-start justify-center">
+    <div class="w-full max-w-3xl space-y-4 my-auto">
+      <div class="no-print glass-panel rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <h3 class="text-sm font-bold text-slate-800 dark:text-white">Printable Withdrawal Slip Preview</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg cursor-pointer">
+            Print Withdrawal Slip
+          </button>
+          <button onclick="closeSlipModals()" class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold glass-input cursor-pointer">
+            Close
+          </button>
+        </div>
+      </div>
+
+      <div id="withdrawalPrintableSheet" class="bg-white text-slate-900 p-6 sm:p-8 border-2 border-slate-900 font-sans">
+        <div class="flex items-start justify-between gap-4 mb-3">
+          <img src="imerchlogoblack.png" alt="iMerch Media Inc." class="h-11 w-auto object-contain" />
+          <div class="text-right text-xs font-semibold leading-tight">
+            <p>#493 Halcon St. Brgy. Malamig</p>
+            <p>Mandaluyong City</p>
+            <p id="slipWitNo" class="font-mono font-bold text-sm mt-1">WDR-0001</p>
+          </div>
+        </div>
+
+        <h2 class="text-center text-lg font-extrabold uppercase tracking-wider mb-4">WITHDRAWAL SLIP</h2>
+
+        <div class="grid grid-cols-12 gap-2 text-xs font-bold mb-3">
+          <div class="col-span-7 space-y-1.5">
+            <div class="flex items-baseline gap-2">
+              <span class="w-28 shrink-0">OUTLET/AREA:</span>
+              <span id="slipWitOutlet" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="w-28 shrink-0">COORDINATOR:</span>
+              <span id="slipWitCoord" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="w-28 shrink-0">CLIENT:</span>
+              <span id="slipWitClient" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+          </div>
+          <div class="col-span-5 space-y-1.5">
+            <div class="flex items-baseline gap-2">
+              <span class="w-12 shrink-0">DATE:</span>
+              <span id="slipWitDate" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="w-12 shrink-0">TIME:</span>
+              <span id="slipWitTime" class="flex-1 border-b border-slate-900 px-1 font-normal"></span>
+            </div>
+          </div>
+        </div>
+
+        <table class="w-full border-collapse border border-slate-900 text-xs mb-6">
+          <thead>
+            <tr class="font-bold text-center">
+              <th class="border border-slate-900 py-1.5 px-2 w-24">QUANTITY</th>
+              <th class="border border-slate-900 py-1.5 px-2 w-24">UNIT</th>
+              <th class="border border-slate-900 py-1.5 px-2">DESCRIPTION</th>
+              <th class="border border-slate-900 py-1.5 px-2 w-44">REMARKS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td id="slipWitQty" class="border border-slate-900 py-3 px-2 text-center font-mono font-bold"></td>
+              <td id="slipWitUnit" class="border border-slate-900 py-3 px-2 text-center"></td>
+              <td id="slipWitDesc" class="border border-slate-900 py-3 px-2"></td>
+              <td id="slipWitRemarks" class="border border-slate-900 py-3 px-2"></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="grid grid-cols-3 gap-6 text-xs pt-4">
+          <div class="text-center">
+            <p class="font-semibold mb-8 text-left">Requested by:</p>
+            <p id="slipWitReqBy" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Name/Signature</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="font-semibold mb-8 text-left">Noted by:</p>
+            <p id="slipWitNotedBy" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Operation Head</p>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="font-semibold mb-8 text-left">Checked/Released by:</p>
+            <p id="slipWitRelBy" class="font-bold uppercase min-h-[16px]"></p>
+            <div class="border-t border-slate-900 pt-1">
+              <p>Warehouse Supervisor</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // PALITAN ITO NG DEPLOYED GOOGLE APPS SCRIPT WEB APP URL MO
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwAmHIby9NeMBPis4S8BuV4HXXDL2Dp0nL5YoRZm7hcs2D49St7DIBA94jbQ1_v6Z13/execE';
+
+    const STORAGE_KEY_THEME = 'imerch_theme_mode';
+    const STORAGE_KEY_TOKEN = 'imerch_wh_session_token';
+    const STORAGE_KEY_USER = 'imerch_wh_session_user';
+    const STORAGE_KEY_CACHE_REC = 'imerch_wh_cache_rec_v1';
+    const STORAGE_KEY_CACHE_WIT = 'imerch_wh_cache_wit_v1';
+
+    // White logo sa Dark Mode, Black logo sa Light Mode
+    const LOGO_LIGHT = 'imerchlogoblack.png';
+    const LOGO_DARK = 'imerchlogowhite1.png';
+
+    let receivingList = [];
+    let withdrawalList = [];
+    let activeFormTab = 'receiving';
+    let activeLedgerView = 'receiving';
+    let calendarDate = new Date();
+    let selectedCalendarDateStr = null;
+    let pendingPhotoBase64 = null;
+    let pendingPhotoFileName = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      setDefaultDateTime();
+
+      if (getSessionToken()) {
+        showSystemUI(getSessionUser());
+        loadWarehouseData();
+      } else {
+        showLoginUI();
+      }
+    });
+
+    function getSessionToken() {
+      return sessionStorage.getItem(STORAGE_KEY_TOKEN) || '';
+    }
+
+    function getSessionUser() {
+      return sessionStorage.getItem(STORAGE_KEY_USER) || '';
+    }
+
+    function showLoginUI() {
+      document.getElementById('mainSystemShell').classList.add('hidden');
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      document.getElementById('loginPassword').value = '';
+    }
+
+    function showSystemUI(username) {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('mainSystemShell').classList.remove('hidden');
+      const label = document.getElementById('sessionUserLabel');
+      if (label) label.textContent = username || '';
+    }
+
+    function toggleLoginPassword() {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const errBox = document.getElementById('loginErrorMsg');
+      const btn = document.getElementById('loginBtn');
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      errBox.classList.add('hidden');
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch(DEFAULT_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login', username, password })
+        });
+        const data = await res.json();
+
+        if (data && data.status === 'success' && data.token) {
+          sessionStorage.setItem(STORAGE_KEY_TOKEN, data.token);
+          sessionStorage.setItem(STORAGE_KEY_USER, data.user || username);
+          document.getElementById('loginPassword').value = '';
+          showSystemUI(data.user || username);
+          showToast('Login successful.', 'success');
+          await loadWarehouseData();
+        } else {
+          errBox.textContent = (data && data.message) || 'Invalid username or password.';
+          errBox.classList.remove('hidden');
+        }
+      } catch (err) {
+        errBox.textContent = 'Unable to connect to Warehouse backend. Check Apps Script URL.';
+        errBox.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    async function handleLogout() {
+      const token = getSessionToken();
+      sessionStorage.removeItem(STORAGE_KEY_TOKEN);
+      sessionStorage.removeItem(STORAGE_KEY_USER);
+      closeSlipModals();
+      showLoginUI();
+
+      if (token) {
+        try {
+          await fetch(DEFAULT_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ action: 'logout', token })
+          });
+        } catch (err) {}
+      }
+      showToast('Logged out.', 'info');
+    }
+
+    function syncLogosWithTheme(isDark) {
+      const headerLogo = document.getElementById('headerBrandLogo');
+      const loginLogo = document.getElementById('loginBrandLogo');
+      if (headerLogo) headerLogo.src = isDark ? LOGO_DARK : LOGO_LIGHT;
+      if (loginLogo) loginLogo.src = isDark ? LOGO_DARK : LOGO_LIGHT;
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) || 'dark';
+      const isDark = savedTheme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      syncLogosWithTheme(isDark);
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(STORAGE_KEY_THEME, isDark ? 'dark' : 'light');
+      syncLogosWithTheme(isDark);
+    }
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().slice(0, 5);
+      document.getElementById('recDate').value = dateStr;
+      document.getElementById('recTime').value = timeStr;
+      document.getElementById('witDate').value = dateStr;
+      document.getElementById('witTime').value = timeStr;
+    }
+
+    async function loadWarehouseData() {
+      const token = getSessionToken();
+      if (!token) {
+        showLoginUI();
+        return;
+      }
+
+      try {
+        const cachedRec = JSON.parse(localStorage.getItem(STORAGE_KEY_CACHE_REC) || '[]');
+        const cachedWit = JSON.parse(localStorage.getItem(STORAGE_KEY_CACHE_WIT) || '[]');
+        if (Array.isArray(cachedRec)) receivingList = cachedRec;
+        if (Array.isArray(cachedWit)) withdrawalList = cachedWit;
+        refreshAllViews();
+      } catch (e) {}
+
+      try {
+        const url = `${DEFAULT_SCRIPT_URL}${DEFAULT_SCRIPT_URL.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`;
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.status === 'unauthorized') {
+          sessionStorage.removeItem(STORAGE_KEY_TOKEN);
+          sessionStorage.removeItem(STORAGE_KEY_USER);
+          showLoginUI();
+          showToast('Session expired. Sign in again.', 'warning');
+          return;
+        }
+
+        if (json.status === 'success') {
+          receivingList = (json.receiving || []).map(r => ({
+            receiptId: String(r['Receipt ID'] || ''),
+            agencySupplier: String(r['Agency/Supplier'] || ''),
+            date: formatDateISO(r['Date']),
+            time: String(r['Time'] || ''),
+            client: String(r['Client'] || ''),
+            quantityReceived: parseFloat(r['Quantity Received']) || 0,
+            remainingStock: parseFloat(r['Remaining Stock']) || 0,
+            unit: String(r['Unit'] || ''),
+            description: String(r['Description'] || ''),
+            remarks: String(r['Remarks'] || ''),
+            deliveredBy: String(r['Delivered By (Name/Sig)'] || ''),
+            plateNo: String(r['Plate #'] || ''),
+            checkedBy: String(r['Checked/Received By (Warehouse Asst)'] || ''),
+            approvedBy: String(r['Approved By (Warehouse Supervisor)'] || ''),
+            asnNote: String(r['ASN Note'] || ''),
+            photoLink: String(r['Photo/ASN Link'] || ''),
+            status: String(r['Status'] || 'In Stock')
+          }));
+
+          withdrawalList = (json.withdrawals || []).map(w => ({
+            withdrawalId: String(w['Withdrawal ID'] || ''),
+            refReceiptId: String(w['Ref Receipt ID'] || ''),
+            outletArea: String(w['Outlet/Area'] || ''),
+            coordinator: String(w['Coordinator'] || ''),
+            client: String(w['Client'] || ''),
+            date: formatDateISO(w['Date']),
+            time: String(w['Time'] || ''),
+            quantityWithdrawn: parseFloat(w['Quantity Withdrawn']) || 0,
+            unit: String(w['Unit'] || ''),
+            description: String(w['Description'] || ''),
+            remarks: String(w['Remarks'] || ''),
+            requestedBy: String(w['Requested By (Name/Sig)'] || ''),
+            notedBy: String(w['Noted By (Operation Head)'] || ''),
+            releasedBy: String(w['Checked/Released By (Warehouse Supervisor)'] || ''),
+            itemPhotoLink: String(w['Item Photo Link'] || '')
+          }));
+
+          localStorage.setItem(STORAGE_KEY_CACHE_REC, JSON.stringify(receivingList));
+          localStorage.setItem(STORAGE_KEY_CACHE_WIT, JSON.stringify(withdrawalList));
+          refreshAllViews();
+        }
+      } catch (err) {
+        showToast('Offline/cached view active; check Google Apps Script URL.', 'warning');
+      }
+    }
+
+    function refreshAllViews() {
+      updateKPIs();
+      updateSlipTagDisplay();
+      populateWithdrawalItemDropdown();
+      renderLedgerTables();
+      renderCalendar();
+    }
+
+    function getNextSlipTag(prefix, list, key) {
+      let maxNum = 0;
+      const rx = new RegExp(prefix + '(\\d+)', 'i');
+      list.forEach(item => {
+        const m = String(item[key] || '').match(rx);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      });
+      return prefix + String(maxNum + 1).padStart(4, '0');
+    }
+
+    function updateSlipTagDisplay() {
+      const el = document.getElementById('displaySlipTag');
+      if (activeFormTab === 'receiving') {
+        el.textContent = getNextSlipTag('REC-', receivingList, 'receiptId');
+      } else {
+        el.textContent = getNextSlipTag('WDR-', withdrawalList, 'withdrawalId');
+      }
+    }
+
+    function switchWarehouseTab(tab) {
+      activeFormTab = tab;
+      const btnRec = document.getElementById('tabReceiving');
+      const btnWit = document.getElementById('tabWithdrawal');
+      const formRec = document.getElementById('receivingForm');
+      const formWit = document.getElementById('withdrawalForm');
+
+      if (tab === 'receiving') {
+        btnRec.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-300 shadow-sm cursor-pointer';
+        btnWit.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer';
+        formRec.classList.remove('hidden');
+        formWit.classList.add('hidden');
+      } else {
+        btnWit.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 bg-white dark:bg-slate-700 text-amber-600 dark:text-amber-300 shadow-sm cursor-pointer';
+        btnRec.className = 'py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer';
+        formRec.classList.add('hidden');
+        formWit.classList.remove('hidden');
+        populateWithdrawalItemDropdown();
+      }
+      updateSlipTagDisplay();
+    }
+
+    /* ================= PHOTO CAPTURE & PREVIEW ================= */
+    function previewReceivingPhoto(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      pendingPhotoFileName = file.name;
+      document.getElementById('recPhotoFileName').textContent = file.name;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pendingPhotoBase64 = e.target.result;
+        const previewBox = document.getElementById('recPhotoPreviewBox');
+        const previewImg = document.getElementById('recPhotoPreviewImg');
+        const previewLabel = document.getElementById('recPhotoPreviewLabel');
+
+        previewLabel.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+        if (file.type.startsWith('image/')) {
+          previewImg.src = pendingPhotoBase64;
+          previewImg.classList.remove('hidden');
+        } else {
+          previewImg.classList.add('hidden');
+        }
+        previewBox.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearReceivingPhoto() {
+      pendingPhotoBase64 = null;
+      pendingPhotoFileName = null;
+      document.getElementById('recPhotoInput').value = '';
+      document.getElementById('recPhotoFileName').textContent = 'No photo selected';
+      document.getElementById('recPhotoPreviewBox').classList.add('hidden');
+    }
+
+    function resetReceivingForm() {
+      document.getElementById('receivingForm').reset();
+      clearReceivingPhoto();
+      setDefaultDateTime();
+      updateSlipTagDisplay();
+    }
+
+    async function handleReceivingSubmit(e) {
+      e.preventDefault();
+      const token = getSessionToken();
+      if (!token) return showLoginUI();
+
+      const btn = document.getElementById('recSubmitBtn');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Saving & Uploading...';
+
+      const payload = {
+        token,
+        action: 'receive',
+        agencySupplier: document.getElementById('recAgencySupplier').value.trim(),
+        date: document.getElementById('recDate').value,
+        time: document.getElementById('recTime').value,
+        client: document.getElementById('recClient').value.trim(),
+        quantity: parseFloat(document.getElementById('recQuantity').value) || 0,
+        unit: document.getElementById('recUnit').value.trim(),
+        description: document.getElementById('recDescription').value.trim(),
+        remarks: document.getElementById('recRemarks').value.trim(),
+        deliveredBy: document.getElementById('recDeliveredBy').value.trim(),
+        plateNo: document.getElementById('recPlateNo').value.trim(),
+        checkedBy: document.getElementById('recCheckedBy').value.trim(),
+        approvedBy: document.getElementById('recApprovedBy').value.trim(),
+        asnNote: document.getElementById('recAsnNote').value.trim(),
+        fileData: pendingPhotoBase64,
+        fileName: pendingPhotoFileName
+      };
+
+      try {
+        const res = await fetch(DEFAULT_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === 'unauthorized') {
+          showLoginUI();
+          showToast('Session expired.', 'warning');
+          return;
+        }
+
+        if (result.status === 'success') {
+          showToast(`Received item logged (${result.receiptId})!`, 'success');
+          resetReceivingForm();
+          await loadWarehouseData();
+        } else {
+          showToast(result.message || 'Error saving receiving entry.', 'error');
+        }
+      } catch (err) {
+        showToast('Network error while saving Receiving entry.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    }
+
+    /* ================= WITHDRAWAL & AUTO STOCK DEDUCTION ================= */
+    function populateWithdrawalItemDropdown() {
+      const select = document.getElementById('witSelectReceived');
+      const available = receivingList.filter(r => r.remainingStock > 0);
+      select.innerHTML = `<option value="">-- Choose available item (${available.length} in stock) --</option>`;
+
+      available.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.receiptId;
+        opt.textContent = `${item.receiptId} • [${item.client}] ${item.description.substring(0, 48)} (Stock: ${item.remainingStock} ${item.unit})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function onSelectReceivedForWithdrawal() {
+      const refId = document.getElementById('witSelectReceived').value;
+      const card = document.getElementById('witSelectedItemCard');
+      if (!refId) {
+        card.classList.add('hidden');
+        return;
+      }
+
+      const item = receivingList.find(r => r.receiptId === refId);
+      if (!item) return;
+
+      document.getElementById('witClient').value = item.client;
+      document.getElementById('witUnit').value = item.unit;
+      document.getElementById('witDescription').value = item.description;
+      document.getElementById('witQuantity').max = item.remainingStock;
+      document.getElementById('witQuantity').value = '';
+      document.getElementById('witQuantity').focus();
+
+      document.getElementById('witItemTitle').textContent = `${item.receiptId} — ${item.description}`;
+      document.getElementById('witItemMeta').textContent = `Supplier: ${item.agencySupplier} | Client: ${item.client}`;
+      document.getElementById('witAvailableStockBadge').textContent = `${item.remainingStock} ${item.unit}`;
+
+      const thumb = document.getElementById('witItemThumb');
+      const noThumb = document.getElementById('witNoThumbBadge');
+      if (item.photoLink && item.photoLink.startsWith('https://')) {
+        thumb.src = item.photoLink;
+        thumb.classList.remove('hidden');
+        noThumb.classList.add('hidden');
+      } else {
+        thumb.classList.add('hidden');
+        noThumb.classList.remove('hidden');
+      }
+
+      card.classList.remove('hidden');
+    }
+
+    function quickWithdrawItem(receiptId) {
+      switchWarehouseTab('withdrawal');
+      document.getElementById('witSelectReceived').value = receiptId;
+      onSelectReceivedForWithdrawal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetWithdrawalForm() {
+      document.getElementById('withdrawalForm').reset();
+      document.getElementById('witSelectedItemCard').classList.add('hidden');
+      setDefaultDateTime();
+      updateSlipTagDisplay();
+    }
+
+    async function handleWithdrawalSubmit(e) {
+      e.preventDefault();
+      const token = getSessionToken();
+      if (!token) return showLoginUI();
+
+      const refReceiptId = document.getElementById('witSelectReceived').value;
+      const item = receivingList.find(r => r.receiptId === refReceiptId);
+      const qty = parseFloat(document.getElementById('witQuantity').value) || 0;
+
+      if (!item) {
+        showToast('Pumili muna ng item mula sa Receiving Sheet.', 'error');
+        return;
+      }
+      if (qty <= 0 || qty > item.remainingStock) {
+        showToast(`Invalid quantity. Available stock: ${item.remainingStock} ${item.unit}`, 'error');
+        return;
+      }
+
+      const btn = document.getElementById('witSubmitBtn');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.textContent = 'Deducting Stock...';
+
+      const payload = {
+        token,
+        action: 'withdraw',
+        refReceiptId,
+        outletArea: document.getElementById('witOutletArea').value.trim(),
+        coordinator: document.getElementById('witCoordinator').value.trim(),
+        client: document.getElementById('witClient').value.trim(),
+        date: document.getElementById('witDate').value,
+        time: document.getElementById('witTime').value,
+        quantity: qty,
+        unit: document.getElementById('witUnit').value.trim(),
+        description: document.getElementById('witDescription').value.trim(),
+        remarks: document.getElementById('witRemarks').value.trim(),
+        requestedBy: document.getElementById('witRequestedBy').value.trim(),
+        notedBy: document.getElementById('witNotedBy').value.trim(),
+        releasedBy: document.getElementById('witReleasedBy').value.trim()
+      };
+
+      try {
+        const res = await fetch(DEFAULT_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+
+        if (result.status === 'success') {
+          showToast(`Withdrawn ${qty} ${payload.unit} (${result.withdrawalId}). Remaining: ${result.remainingStock}`, 'success');
+          resetWithdrawalForm();
+          await loadWarehouseData();
+        } else {
+          showToast(result.message || 'Withdrawal failed.', 'error');
+        }
+      } catch (err) {
+        showToast('Network error while saving Withdrawal Slip.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
+    }
+
+    /* ================= LEDGER TABLES & KPI ================= */
+    function updateKPIs() {
+      const batches = receivingList.length;
+      const remQty = receivingList.reduce((sum, r) => sum + (Number(r.remainingStock) || 0), 0);
+      const witQty = withdrawalList.reduce((sum, w) => sum + (Number(w.quantityWithdrawn) || 0), 0);
+
+      document.getElementById('kpiBatches').textContent = batches;
+      document.getElementById('kpiRemainingQty').textContent = remQty.toLocaleString();
+      document.getElementById('kpiWithdrawnQty').textContent = witQty.toLocaleString();
+      document.getElementById('kpiWithdrawalCount').textContent = withdrawalList.length;
+    }
+
+    function switchLedgerView(view) {
+      activeLedgerView = view;
+      const tabRec = document.getElementById('ledgerTabRec');
+      const tabWit = document.getElementById('ledgerTabWit');
+      const wrapRec = document.getElementById('receivingTableWrapper');
+      const wrapWit = document.getElementById('withdrawalTableWrapper');
+
+      if (view === 'receiving') {
+        tabRec.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-sky-500 text-white shadow cursor-pointer';
+        tabWit.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold glass-input text-slate-600 dark:text-slate-300 cursor-pointer';
+        wrapRec.classList.remove('hidden');
+        wrapWit.classList.add('hidden');
+      } else {
+        tabWit.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-500 text-white shadow cursor-pointer';
+        tabRec.className = 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold glass-input text-slate-600 dark:text-slate-300 cursor-pointer';
+        wrapWit.classList.remove('hidden');
+        wrapRec.classList.add('hidden');
+      }
+      renderLedgerTables();
+    }
+
+    function renderLedgerTables() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const stockFilter = document.getElementById('filterStockStatus').value;
+
+      // Render Receiving Sheet
+      const recBody = document.getElementById('receivingTableBody');
+      const filteredRec = receivingList.filter(r => {
+        const matchQ =
+          r.receiptId.toLowerCase().includes(q) ||
+          r.agencySupplier.toLowerCase().includes(q) ||
+          r.client.toLowerCase().includes(q) ||
+          r.description.toLowerCase().includes(q);
+        const matchStock =
+          stockFilter === 'ALL' ||
+          (stockFilter === 'AVAILABLE' && r.remainingStock > 0) ||
+          (stockFilter === 'DEPLETED' && r.remainingStock <= 0);
+        const matchDate = !selectedCalendarDateStr || r.date === selectedCalendarDateStr;
+        return matchQ && matchStock && matchDate;
+      });
+
+      if (filteredRec.length === 0) {
+        recBody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500">Walang nakitang record sa Receiving Sheet.</td></tr>`;
+      } else {
+        recBody.innerHTML = filteredRec.map(r => {
+          const safeId = escapeHtml(r.receiptId);
+          const hasPhoto = r.photoLink && r.photoLink.startsWith('https://');
+          const photoHtml = hasPhoto
+            ? `<img src="${escapeHtml(r.photoLink)}" alt="${safeId}" onclick="openImageModal('${escapeHtml(r.photoLink)}', '${safeId} — ${escapeHtml(r.description)}')" class="w-12 h-12 rounded-lg object-cover border border-sky-400/40 cursor-pointer hover:scale-105 transition" title="Click to view full image" />`
+            : `<span class="text-[11px] text-slate-400 italic">No image</span>`;
+
+          const stockColor = r.remainingStock > 0 ? 'text-emerald-500' : 'text-rose-400';
+          const withdrawBtn = r.remainingStock > 0
+            ? `<button onclick="quickWithdrawItem('${safeId}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 border border-amber-500/30 cursor-pointer">Withdraw</button>`
+            : `<span class="px-2 py-1 rounded text-[11px] font-semibold bg-rose-500/15 text-rose-400">Out</span>`;
+
+          return `
+            <tr class="hover:bg-slate-200/35 dark:hover:bg-slate-800/45 transition">
+              <td class="py-3 px-4 align-top font-mono font-bold text-sky-500">${safeId}</td>
+              <td class="py-3 px-4 align-top">${photoHtml}</td>
+              <td class="py-3 px-4 align-top">
+                <div class="font-bold">${escapeHtml(r.client)}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(r.agencySupplier)}</div>
+              </td>
+              <td class="py-3 px-4 align-top max-w-xs">
+                <p class="text-xs font-medium">${escapeHtml(r.description)}</p>
+                ${r.remarks ? `<p class="text-[11px] text-slate-400 mt-0.5">Remarks: ${escapeHtml(r.remarks)}</p>` : ''}
+                ${r.asnNote ? `<p class="text-[11px] text-sky-400 mt-0.5">ASN: ${escapeHtml(r.asnNote)}</p>` : ''}
+              </td>
+              <td class="py-3 px-4 align-top font-mono whitespace-nowrap">
+                <span class="font-extrabold text-sm ${stockColor}">${r.remainingStock}</span>
+                <span class="text-xs text-slate-400">/ ${r.quantityReceived} ${escapeHtml(r.unit)}</span>
+              </td>
+              <td class="py-3 px-4 align-top text-xs font-mono whitespace-nowrap">
+                <div>${escapeHtml(r.date)}</div>
+                <div class="text-slate-400">${escapeHtml(r.time)}</div>
+              </td>
+              <td class="py-3 px-4 align-top text-[11px] text-slate-500 dark:text-slate-400">
+                <div><strong>Del:</strong> ${escapeHtml(r.deliveredBy)} ${r.plateNo ? '(' + escapeHtml(r.plateNo) + ')' : ''}</div>
+                <div><strong>Rcv:</strong> ${escapeHtml(r.checkedBy)}</div>
+                <div><strong>Appr:</strong> ${escapeHtml(r.approvedBy)}</div>
+              </td>
+              <td class="py-3 px-4 align-top text-right whitespace-nowrap">
+                <div class="inline-flex items-center gap-1.5">
+                  <button onclick="openReceivingSlip('${safeId}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-sky-500/15 text-sky-500 hover:bg-sky-500/25 border border-sky-500/30 cursor-pointer">Slip</button>
+                  ${withdrawBtn}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render Withdrawal Sheet
+      const witBody = document.getElementById('withdrawalTableBody');
+      const filteredWit = withdrawalList.filter(w => {
+        const matchQ =
+          w.withdrawalId.toLowerCase().includes(q) ||
+          w.refReceiptId.toLowerCase().includes(q) ||
+          w.outletArea.toLowerCase().includes(q) ||
+          w.client.toLowerCase().includes(q) ||
+          w.description.toLowerCase().includes(q);
+        const matchDate = !selectedCalendarDateStr || w.date === selectedCalendarDateStr;
+        return matchQ && matchDate;
+      });
+
+      if (filteredWit.length === 0) {
+        witBody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-500">Walang nakitang record sa Withdrawal Sheet.</td></tr>`;
+      } else {
+        witBody.innerHTML = filteredWit.map(w => {
+          const safeId = escapeHtml(w.withdrawalId);
+          const hasPhoto = w.itemPhotoLink && w.itemPhotoLink.startsWith('https://');
+          const photoHtml = hasPhoto
+            ? `<img src="${escapeHtml(w.itemPhotoLink)}" alt="${safeId}" onclick="openImageModal('${escapeHtml(w.itemPhotoLink)}', '${safeId} — ${escapeHtml(w.description)}')" class="w-12 h-12 rounded-lg object-cover border border-amber-400/40 cursor-pointer" />`
+            : `<span class="text-[11px] text-slate-400 italic">No image</span>`;
+
+          return `
+            <tr class="hover:bg-slate-200/35 dark:hover:bg-slate-800/45 transition">
+              <td class="py-3 px-4 align-top font-mono">
+                <div class="font-bold text-amber-500">${safeId}</div>
+                <div class="text-[11px] text-slate-400">Ref: ${escapeHtml(w.refReceiptId)}</div>
+              </td>
+              <td class="py-3 px-4 align-top">${photoHtml}</td>
+              <td class="py-3 px-4 align-top">
+                <div class="font-bold">${escapeHtml(w.outletArea)}</div>
+                <div class="text-xs text-sky-400">Coord: ${escapeHtml(w.coordinator)}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(w.client)}</div>
+              </td>
+              <td class="py-3 px-4 align-top max-w-xs">
+                <p class="text-xs font-medium">${escapeHtml(w.description)}</p>
+                ${w.remarks ? `<p class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(w.remarks)}</p>` : ''}
+              </td>
+              <td class="py-3 px-4 align-top font-mono font-extrabold text-amber-500 whitespace-nowrap">
+                -${w.quantityWithdrawn} ${escapeHtml(w.unit)}
+              </td>
+              <td class="py-3 px-4 align-top text-xs font-mono whitespace-nowrap">
+                <div>${escapeHtml(w.date)}</div>
+                <div class="text-slate-400">${escapeHtml(w.time)}</div>
+              </td>
+              <td class="py-3 px-4 align-top text-[11px] text-slate-500 dark:text-slate-400">
+                <div><strong>Req:</strong> ${escapeHtml(w.requestedBy)}</div>
+                <div><strong>Noted:</strong> ${escapeHtml(w.notedBy)}</div>
+                <div><strong>Rel:</strong> ${escapeHtml(w.releasedBy)}</div>
+              </td>
+              <td class="py-3 px-4 align-top text-right whitespace-nowrap">
+                <button onclick="openWithdrawalSlip('${safeId}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 border border-amber-500/30 cursor-pointer">Slip</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    /* ================= CALENDAR ================= */
+    function renderCalendar() {
+      const year = calendarDate.getFullYear();
+      const month = calendarDate.getMonth();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const grid = document.getElementById('calendarGrid');
+
+      const recDates = new Set(receivingList.map(r => r.date).filter(Boolean));
+      const witDates = new Set(withdrawalList.map(w => w.date).filter(Boolean));
+
+      const cells = [];
+      for (let i = 0; i < firstDayIndex; i++) cells.push(`<div class="p-2"></div>`);
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const hasRec = recDates.has(dateStr);
+        const hasWit = witDates.has(dateStr);
+        const isSelected = selectedCalendarDateStr === dateStr;
+        const isToday = dateStr === todayStr;
+
+        let classes = 'relative p-2 rounded-xl text-xs font-semibold transition cursor-pointer flex flex-col items-center justify-center ';
+        if (isSelected) {
+          classes += 'bg-sky-500 text-white shadow-md shadow-sky-500/30 ';
+        } else if (isToday) {
+          classes += 'border border-sky-500 bg-sky-500/10 text-sky-600 dark:text-sky-300 ';
+        } else {
+          classes += 'hover:bg-slate-200/70 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300 ';
+        }
+
+        let dots = '';
+        if (hasRec || hasWit) {
+          dots = `<div class="flex items-center gap-0.5 mt-0.5">
+            ${hasRec ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>' : ''}
+            ${hasWit ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>' : ''}
+          </div>`;
+        }
+
+        cells.push(`<button type="button" onclick="selectCalendarDate('${dateStr}')" class="${classes}"><span>${day}</span>${dots}</button>`);
+      }
+      grid.innerHTML = cells.join('');
+    }
+
+    function changeMonth(delta) {
+      calendarDate.setMonth(calendarDate.getMonth() + delta);
+      renderCalendar();
+    }
+
+    function goToToday() {
+      calendarDate = new Date();
+      selectCalendarDate(calendarDate.toISOString().split('T')[0]);
+    }
+
+    function selectCalendarDate(dateStr) {
+      selectedCalendarDateStr = dateStr;
+      renderCalendar();
+      renderLedgerTables();
+
+      document.getElementById('selectedDateTitle').textContent = `Warehouse Activity on ${dateStr}`;
+      document.getElementById('clearDateFilterBtn').classList.remove('hidden');
+
+      const recs = receivingList.filter(r => r.date === dateStr);
+      const wits = withdrawalList.filter(w => w.date === dateStr);
+      const listEl = document.getElementById('calendarEventList');
+
+      if (recs.length === 0 && wits.length === 0) {
+        listEl.innerHTML = `<p class="text-slate-500 italic">No receiving or withdrawal logs on this date.</p>`;
+        return;
+      }
+
+      const itemsHtml = [
+        ...recs.map(r => `
+          <div class="p-2 rounded-lg bg-slate-200/50 dark:bg-slate-800/60 flex items-center justify-between gap-2">
+            <div><span class="text-emerald-400 font-bold">[IN]</span> <span class="font-mono font-bold">${escapeHtml(r.receiptId)}</span> • ${escapeHtml(r.client)} (${r.quantityReceived} ${escapeHtml(r.unit)})</div>
+            <button onclick="openReceivingSlip('${escapeHtml(r.receiptId)}')" class="px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 font-bold text-[11px] cursor-pointer">Slip</button>
+          </div>
+        `),
+        ...wits.map(w => `
+          <div class="p-2 rounded-lg bg-slate-200/50 dark:bg-slate-800/60 flex items-center justify-between gap-2">
+            <div><span class="text-amber-400 font-bold">[OUT]</span> <span class="font-mono font-bold">${escapeHtml(w.withdrawalId)}</span> • ${escapeHtml(w.outletArea)} (-${w.quantityWithdrawn} ${escapeHtml(w.unit)})</div>
+            <button onclick="openWithdrawalSlip('${escapeHtml(w.withdrawalId)}')" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold text-[11px] cursor-pointer">Slip</button>
+          </div>
+        `)
+      ];
+      listEl.innerHTML = itemsHtml.join('');
+    }
+
+    function clearDateFilter() {
+      selectedCalendarDateStr = null;
+      document.getElementById('selectedDateTitle').textContent = 'Select a date to view logs';
+      document.getElementById('clearDateFilterBtn').classList.add('hidden');
+      document.getElementById('calendarEventList').innerHTML = `<p class="text-slate-500 dark:text-slate-400 italic">Click any highlighted day on the calendar to inspect receiving or withdrawal slips.</p>`;
+      renderCalendar();
+      renderLedgerTables();
+    }
+
+    /* ================= MODALS & SLIPS ================= */
+    function openImageModal(src, caption) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxCaption').textContent = caption || 'Attachment Preview';
+      document.getElementById('imageLightboxModal').classList.remove('hidden');
+    }
+
+    function closeImageModal() {
+      document.getElementById('imageLightboxModal').classList.add('hidden');
+    }
+
+    function openReceivingSlip(receiptId) {
+      const r = receivingList.find(x => x.receiptId === receiptId);
+      if (!r) return;
+
+      document.getElementById('slipRecNo').textContent = r.receiptId;
+      document.getElementById('slipRecSupplier').textContent = r.agencySupplier;
+      document.getElementById('slipRecClient').textContent = r.client;
+      document.getElementById('slipRecDate').textContent = r.date;
+      document.getElementById('slipRecTime').textContent = r.time;
+      document.getElementById('slipRecQty').textContent = r.quantityReceived;
+      document.getElementById('slipRecUnit').textContent = r.unit;
+      document.getElementById('slipRecDesc').textContent = r.description;
+      document.getElementById('slipRecRemarks').textContent = r.remarks;
+      document.getElementById('slipRecDelivered').textContent = r.deliveredBy;
+      document.getElementById('slipRecPlate').textContent = r.plateNo;
+      document.getElementById('slipRecChecked').textContent = r.checkedBy;
+      document.getElementById('slipRecApproved').textContent = r.approvedBy;
+      document.getElementById('slipRecAsn').textContent = r.asnNote ? `(${r.asnNote})` : '';
+
+      closeSlipModals();
+      const modal = document.getElementById('receivingSlipModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('active-print-modal');
+    }
+
+    function openWithdrawalSlip(withdrawalId) {
+      const w = withdrawalList.find(x => x.withdrawalId === withdrawalId);
+      if (!w) return;
+
+      document.getElementById('slipWitNo').textContent = w.withdrawalId;
+      document.getElementById('slipWitOutlet').textContent = w.outletArea;
+      document.getElementById('slipWitCoord').textContent = w.coordinator;
+      document.getElementById('slipWitClient').textContent = w.client;
+      document.getElementById('slipWitDate').textContent = w.date;
+      document.getElementById('slipWitTime').textContent = w.time;
+      document.getElementById('slipWitQty').textContent = w.quantityWithdrawn;
+      document.getElementById('slipWitUnit').textContent = w.unit;
+      document.getElementById('slipWitDesc').textContent = w.description;
+      document.getElementById('slipWitRemarks').textContent = w.remarks;
+      document.getElementById('slipWitReqBy').textContent = w.requestedBy;
+      document.getElementById('slipWitNotedBy').textContent = w.notedBy;
+      document.getElementById('slipWitRelBy').textContent = w.releasedBy;
+
+      closeSlipModals();
+      const modal = document.getElementById('withdrawalSlipModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('active-print-modal');
+    }
+
+    function closeSlipModals() {
+      ['receivingSlipModal', 'withdrawalSlipModal'].forEach(id => {
+        const m = document.getElementById(id);
+        m.classList.add('hidden');
+        m.classList.remove('active-print-modal');
+      });
+    }
+
+    function formatDateISO(val) {
+      if (!val) return '';
+      if (/^\d{4}-\d{2}-\d{2}$/.test(String(val))) return String(val);
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? String(val) : d.toISOString().split('T')[0];
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'border-emerald-500/40 bg-emerald-950/95 text-emerald-200',
+        error: 'border-rose-500/40 bg-rose-950/95 text-rose-200',
+        warning: 'border-amber-500/40 bg-amber-950/95 text-amber-200',
+        info: 'border-sky-500/40 bg-slate-900/95 text-sky-200'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-semibold flex items-center gap-2.5 transition-opacity duration-200 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 220);
+      }, 3400);
+    }
+  </script>
+</body>
+</html>
