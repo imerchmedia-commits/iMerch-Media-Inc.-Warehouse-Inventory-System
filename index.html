@@ -405,6 +405,16 @@
               </div>
 
               <div class="flex items-center gap-2">
+                <div class="relative space-y-2">
+                  <div class="relative">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" id="recItemSearch" oninput="filterSearchableItemDropdown('rec')" onfocus="openSearchableItemList('rec')" placeholder="Search item name or category (e.g., Polo Shirt, POP, Cellphone)..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                    <button type="button" id="recItemClearBtn" onclick="clearSearchableItemSelection('rec')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
+                  </div>
+                  <div id="recItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-sky-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+                </div>
                 <select id="recItemDropdown" onchange="onWarehouseItemSelected('rec')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
                   <option value="">-- Select item from dropdown or type custom description below --</option>
                 </select>
@@ -557,6 +567,16 @@
               <label for="witSelectReceived" class="block text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
                 Select Received Item to Withdraw (Auto-Deducts Stock) <span class="text-rose-500">*</span>
               </label>
+              <div class="relative space-y-2">
+                <div class="relative">
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" id="witReceivedSearch" oninput="filterReceivedWithdrawalList()" onfocus="filterReceivedWithdrawalList()" placeholder="Search REC ID, client, supplier, or item stock..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                  <button type="button" id="witReceivedClearBtn" onclick="clearReceivedWithdrawalSearch()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
+                </div>
+                <div id="witReceivedSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-amber-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+              </div>
               <select id="witSelectReceived" required onchange="onSelectReceivedForWithdrawal()" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
                 <option value="">-- Choose available item from Receiving Sheet --</option>
               </select>
@@ -647,6 +667,16 @@
               </div>
 
               <div class="flex items-center gap-2">
+                <div class="relative space-y-2">
+                  <div class="relative">
+                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" id="witItemSearch" oninput="filterSearchableItemDropdown('wit')" onfocus="openSearchableItemList('wit')" placeholder="Search item name or category..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                    <button type="button" id="witItemClearBtn" onclick="clearSearchableItemSelection('wit')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
+                  </div>
+                  <div id="witItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-amber-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+                </div>
                 <select id="witItemDropdown" onchange="onWarehouseItemSelected('wit')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
                   <option value="">-- Select item from dropdown or auto-filled from stock --</option>
                 </select>
@@ -2514,6 +2544,187 @@
       XLSX.writeFile(wb, `iMerch_Warehouse_${safeFile}_${new Date().toISOString().split('T')[0]}.xlsx`);
       showToast(`Exported Excel for ${selectedClient === 'ALL' ? 'All Clients' : selectedClient}.`, 'success');
     }
+  
+    /* ================= SEARCHABLE ITEM DROPDOWN ================= */
+    function getFlatCatalogItems() {
+      const catalog = getMergedCatalog();
+      const flat = [];
+      Object.keys(catalog).forEach(cat => {
+        (catalog[cat] || []).forEach(item => {
+          const isPolo = Boolean(item.isPolo || cat === 'Polo Shirt' || /^polo\s*shirt/i.test(item.name));
+          flat.push({
+            category: cat,
+            name: item.name,
+            unit: item.unit || 'pcs',
+            isPolo,
+            value: `${cat}::${item.name}::${item.unit || ''}::${isPolo ? '1' : '0'}`
+          });
+        });
+      });
+      return flat;
+    }
+
+    function openSearchableItemList(prefix) {
+      filterSearchableItemDropdown(prefix);
+    }
+
+    function filterSearchableItemDropdown(prefix) {
+      const searchInput = document.getElementById(prefix + 'ItemSearch');
+      const resultsBox = document.getElementById(prefix + 'ItemSearchResults');
+      const clearBtn = document.getElementById(prefix + 'ItemClearBtn');
+      if (!searchInput || !resultsBox) return;
+
+      const q = searchInput.value.trim().toLowerCase();
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !q && !(document.getElementById(prefix + 'ItemDropdown')?.value));
+      }
+
+      const items = getFlatCatalogItems().filter(it =>
+        !q ||
+        it.name.toLowerCase().includes(q) ||
+        it.category.toLowerCase().includes(q) ||
+        it.unit.toLowerCase().includes(q)
+      );
+
+      if (items.length === 0) {
+        resultsBox.innerHTML = `
+          <div class="p-3 text-xs text-slate-400 flex items-center justify-between gap-2">
+            <span>Walang match para sa "${escapeHtml(searchInput.value.trim())}".</span>
+            <button type="button" onclick="openAddNewItemModal('${prefix}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-bold text-[11px] cursor-pointer shrink-0">+ Add Item</button>
+          </div>
+        `;
+      } else {
+        resultsBox.innerHTML = items.map(it => `
+          <button type="button" onclick="selectSearchedWarehouseItem('${prefix}', '${escapeHtml(it.value).replace(/'/g, '&#39;')}')" class="w-full px-3.5 py-2.5 text-left hover:bg-sky-500/15 transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-semibold text-white truncate">${escapeHtml(it.name)}</div>
+              <div class="text-[10px] font-mono uppercase text-sky-400">${escapeHtml(it.category)}</div>
+            </div>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">${escapeHtml(it.unit)}</span>
+          </button>
+        `).join('');
+      }
+      resultsBox.classList.remove('hidden');
+    }
+
+    function selectSearchedWarehouseItem(prefix, encodedValue) {
+      const sel = document.getElementById(prefix + 'ItemDropdown');
+      const searchInput = document.getElementById(prefix + 'ItemSearch');
+      const resultsBox = document.getElementById(prefix + 'ItemSearchResults');
+      const clearBtn = document.getElementById(prefix + 'ItemClearBtn');
+
+      if (sel) {
+        sel.value = encodedValue;
+        onWarehouseItemSelected(prefix);
+      }
+      const [, itemName, ,] = String(encodedValue || '').split('::');
+      if (searchInput && itemName) searchInput.value = itemName;
+      if (resultsBox) resultsBox.classList.add('hidden');
+      if (clearBtn) clearBtn.classList.remove('hidden');
+    }
+
+    function clearSearchableItemSelection(prefix) {
+      const sel = document.getElementById(prefix + 'ItemDropdown');
+      const searchInput = document.getElementById(prefix + 'ItemSearch');
+      const resultsBox = document.getElementById(prefix + 'ItemSearchResults');
+      const clearBtn = document.getElementById(prefix + 'ItemClearBtn');
+
+      if (searchInput) searchInput.value = '';
+      if (sel) {
+        sel.value = '';
+        onWarehouseItemSelected(prefix);
+      }
+      if (resultsBox) resultsBox.classList.add('hidden');
+      if (clearBtn) clearBtn.classList.add('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      ['rec', 'wit'].forEach(prefix => {
+        const searchInput = document.getElementById(prefix + 'ItemSearch');
+        const resultsBox = document.getElementById(prefix + 'ItemSearchResults');
+        if (searchInput && resultsBox && !searchInput.contains(e.target) && !resultsBox.contains(e.target)) {
+          resultsBox.classList.add('hidden');
+        }
+      });
+    });
+
+  
+    function filterReceivedWithdrawalList() {
+      const inp = document.getElementById('witReceivedSearch');
+      const box = document.getElementById('witReceivedSearchResults');
+      const clr = document.getElementById('witReceivedClearBtn');
+      if (!inp || !box) return;
+
+      const q = inp.value.trim().toLowerCase();
+      if (clr) {
+        clr.classList.toggle('hidden', !q && !(document.getElementById('witSelectReceived')?.value));
+      }
+
+      const available = receivingList.filter(r => r.remainingStock > 0).filter(item =>
+        !q ||
+        item.receiptId.toLowerCase().includes(q) ||
+        item.client.toLowerCase().includes(q) ||
+        item.agencySupplier.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q)
+      );
+
+      if (available.length === 0) {
+        box.innerHTML = `<div class="p-3 text-xs text-slate-400">Walang available stock match para sa "${escapeHtml(inp.value.trim())}".</div>`;
+      } else {
+        box.innerHTML = available.map(item => `
+          <button type="button" onclick="selectSearchedReceivedItem('${escapeHtml(item.receiptId).replace(/'/g, '&#39;')}')" class="w-full px-3.5 py-2.5 text-left hover:bg-amber-500/15 transition flex items-center justify-between gap-2 cursor-pointer">
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-semibold text-white truncate">${escapeHtml(item.receiptId)} • ${escapeHtml(item.description)}</div>
+              <div class="text-[10px] font-mono text-amber-300 truncate">${escapeHtml(item.client)} — ${escapeHtml(item.agencySupplier)}</div>
+            </div>
+            <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 shrink-0">${item.remainingStock} ${escapeHtml(item.unit)}</span>
+          </button>
+        `).join('');
+      }
+      box.classList.remove('hidden');
+    }
+
+    function selectSearchedReceivedItem(receiptId) {
+      const sel = document.getElementById('witSelectReceived');
+      const inp = document.getElementById('witReceivedSearch');
+      const box = document.getElementById('witReceivedSearchResults');
+      const clr = document.getElementById('witReceivedClearBtn');
+      const found = receivingList.find(r => r.receiptId === receiptId);
+
+      if (sel) {
+        sel.value = receiptId;
+        onSelectReceivedForWithdrawal();
+      }
+      if (inp && found) {
+        inp.value = `${found.receiptId} - ${found.description}`;
+      }
+      if (box) box.classList.add('hidden');
+      if (clr) clr.classList.remove('hidden');
+    }
+
+    function clearReceivedWithdrawalSearch() {
+      const sel = document.getElementById('witSelectReceived');
+      const inp = document.getElementById('witReceivedSearch');
+      const box = document.getElementById('witReceivedSearchResults');
+      const clr = document.getElementById('witReceivedClearBtn');
+
+      if (inp) inp.value = '';
+      if (sel) {
+        sel.value = '';
+        onSelectReceivedForWithdrawal();
+      }
+      if (box) box.classList.add('hidden');
+      if (clr) clr.classList.add('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      const inp = document.getElementById('witReceivedSearch');
+      const box = document.getElementById('witReceivedSearchResults');
+      if (inp && box && !inp.contains(e.target) && !box.contains(e.target)) {
+        box.classList.add('hidden');
+      }
+    });
+
   </script>
 </body>
 </html>
