@@ -396,7 +396,7 @@
             <div class="p-4 rounded-xl bg-sky-500/10 border border-sky-500/25 space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <label for="recItemDropdown" class="block text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                  Description Dropdown (Polo Shirt, Pop Materials, Cellphone)
+                  Description Dropdown (Dynamic Categories &amp; Catalog)
                 </label>
                 <button type="button" onclick="openAddNewItemModal('rec')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/35 flex items-center gap-1 cursor-pointer" title="Add New Item to Dropdown">
                   <span class="text-sm leading-none font-extrabold">+</span>
@@ -409,7 +409,7 @@
                   <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  <input type="text" id="recItemSearch" oninput="filterSearchableItemDropdown('rec')" onfocus="openSearchableItemList('rec')" placeholder="Search item name or category (e.g., Polo Shirt, POP, Cellphone)..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                  <input type="text" id="recItemSearch" oninput="filterSearchableItemDropdown('rec')" onfocus="openSearchableItemList('rec')" placeholder="Search item name or category..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
                   <button type="button" id="recItemClearBtn" onclick="clearSearchableItemSelection('rec')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
                 </div>
                 <div id="recItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-sky-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
@@ -1448,7 +1448,7 @@
             const customFromSheet = json.catalog
               .filter(item => item && item.name)
               .map(item => ({
-                category: String(item.category || 'Pop Materials').trim(),
+                category: String(item.category || '').trim(),
                 name: String(item.name || '').trim(),
                 unit: String(item.unit || 'pcs').trim() || 'pcs',
                 isPolo: Boolean(item.isPolo)
@@ -1517,7 +1517,7 @@
 
     function getNextSlipTag(prefix, list, key) {
       let maxNum = 0;
-      const rx = new RegExp(prefix + '(\d+)', 'i');
+      const rx = new RegExp(prefix + '(\\d+)', 'i');
       list.forEach(item => {
         const m = String(item[key] || '').match(rx);
         if (m) {
@@ -2331,8 +2331,8 @@
       const sel = document.getElementById('newItemCategory');
       if (!sel) return;
       const cats = getAllCategories();
-      const target = selectedCat || sel.value || cats[0] || 'Pop Materials';
-      sel.innerHTML = cats.map(c =>
+      const target = selectedCat || sel.value || '';
+      sel.innerHTML = '<option value="">-- Select category group --</option>' + cats.map(c =>
         `<option value="${escapeHtml(c)}"${c === target ? ' selected' : ''}>${escapeHtml(c)}</option>`
       ).join('');
     }
@@ -2395,14 +2395,14 @@
         const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ITEMS) || '[]');
         if (Array.isArray(custom)) {
           custom.forEach(item => {
-            const rawCat = String(item.category || 'Pop Materials').trim();
-            const cat = merged[rawCat] ? rawCat : (rawCat || 'Pop Materials');
+            const cat = String(item.category || '').trim();
+            if (!cat) return;
             if (!merged[cat]) merged[cat] = [];
             if (item && item.name && !merged[cat].some(x => x.name.toLowerCase() === item.name.toLowerCase())) {
               merged[cat].push({
                 name: item.name,
                 unit: item.unit || 'pcs',
-                isPolo: cat === 'Polo Shirt' || /^polo\s*shirt/i.test(item.name)
+                isPolo: cat.toLowerCase() === 'polo shirt' || /^polo\s*shirt/i.test(item.name)
               });
             }
           });
@@ -2440,7 +2440,7 @@
         return;
       }
       const [cat, itemName, defaultUnit, isPoloFlag] = raw.split('::');
-      const isPolo = isPoloFlag === '1' || cat === 'Polo Shirt' || /polo\s*shirt/i.test(itemName);
+      const isPolo = isPoloFlag === '1' || cat.toLowerCase() === 'polo shirt' || /polo\s*shirt/i.test(itemName);
       if (poloPanel) {
         if (isPolo) { poloPanel.classList.remove('hidden'); poloPanel.classList.add('grid'); }
         else {
@@ -2488,6 +2488,10 @@
       const category = document.getElementById('newItemCategory').value;
       const name = document.getElementById('newItemName').value.trim();
       const unit = document.getElementById('newItemDefaultUnit').value.trim() || 'pcs';
+      if (!category) {
+        showToast('Pumili muna o mag-add ng Category / Group.', 'warning');
+        return;
+      }
       if (!name) return;
 
       const btn = document.getElementById('saveNewItemBtn');
@@ -2523,7 +2527,7 @@
         } catch (err) {}
       }
 
-      const selectedVal = `${category}::${name}::${unit}::${category === 'Polo Shirt' ? '1' : '0'}`;
+      const selectedVal = `${category}::${name}::${unit}::${category.toLowerCase() === 'polo shirt' ? '1' : '0'}`;
       if (targetItemPrefix === 'wit') {
         renderItemDropdowns('', selectedVal);
       } else {
@@ -2674,7 +2678,7 @@
       const flat = [];
       Object.keys(catalog).forEach(cat => {
         (catalog[cat] || []).forEach(item => {
-          const isPolo = Boolean(item.isPolo || cat === 'Polo Shirt' || /^polo\s*shirt/i.test(item.name));
+          const isPolo = Boolean(item.isPolo || cat.toLowerCase() === 'polo shirt' || /^polo\s*shirt/i.test(item.name));
           flat.push({
             category: cat,
             name: item.name,
