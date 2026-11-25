@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
@@ -169,7 +169,7 @@
 
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">Sign In</h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">iMerch Media Inc. • Warehouse Receiving &amp; Withdrawal System</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">iMerch Media Inc. &bull; Warehouse Receiving &amp; Withdrawal System</p>
       </div>
 
       <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4" autocomplete="on">
@@ -404,17 +404,18 @@
                 </button>
               </div>
 
-              <div class="flex items-center gap-2">
-                <div class="relative space-y-2">
-                  <div class="relative">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input type="text" id="recItemSearch" oninput="filterSearchableItemDropdown('rec')" onfocus="openSearchableItemList('rec')" placeholder="Search item name or category (e.g., Polo Shirt, POP, Cellphone)..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
-                    <button type="button" id="recItemClearBtn" onclick="clearSearchableItemSelection('rec')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
-                  </div>
-                  <div id="recItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-sky-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+              <div class="space-y-2">
+                <div class="relative">
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" id="recItemSearch" oninput="filterSearchableItemDropdown('rec')" onfocus="openSearchableItemList('rec')" placeholder="Search item name or category (e.g., Polo Shirt, POP, Cellphone)..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                  <button type="button" id="recItemClearBtn" onclick="clearSearchableItemSelection('rec')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
                 </div>
+                <div id="recItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-sky-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+              </div>
+
+              <div class="flex items-center gap-2">
                 <select id="recItemDropdown" onchange="onWarehouseItemSelected('rec')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
                   <option value="">-- Select item from dropdown or type custom description below --</option>
                 </select>
@@ -666,17 +667,18 @@
                 </button>
               </div>
 
-              <div class="flex items-center gap-2">
-                <div class="relative space-y-2">
-                  <div class="relative">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input type="text" id="witItemSearch" oninput="filterSearchableItemDropdown('wit')" onfocus="openSearchableItemList('wit')" placeholder="Search item name or category..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
-                    <button type="button" id="witItemClearBtn" onclick="clearSearchableItemSelection('wit')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
-                  </div>
-                  <div id="witItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-amber-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+              <div class="space-y-2">
+                <div class="relative">
+                  <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" id="witItemSearch" oninput="filterSearchableItemDropdown('wit')" onfocus="openSearchableItemList('wit')" placeholder="Search item name or category..." class="w-full rounded-xl pl-9 pr-16 py-2 text-xs sm:text-sm glass-input" autocomplete="off" />
+                  <button type="button" id="witItemClearBtn" onclick="clearSearchableItemSelection('wit')" class="hidden absolute right-2 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-600/40 hover:bg-slate-600/60 text-slate-200 cursor-pointer">Clear</button>
                 </div>
+                <div id="witItemSearchResults" class="hidden max-h-48 overflow-y-auto rounded-xl border border-amber-500/30 bg-slate-900/95 divide-y divide-slate-800 shadow-xl z-20"></div>
+              </div>
+
+              <div class="flex items-center gap-2">
                 <select id="witItemDropdown" onchange="onWarehouseItemSelected('wit')" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
                   <option value="">-- Select item from dropdown or auto-filled from stock --</option>
                 </select>
@@ -892,7 +894,7 @@
           </table>
           <!-- Receiving Pagination Controls -->
           <div id="receivingPaginationBar" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-slate-200/40 dark:bg-slate-800/60 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
-            <span id="receivingPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0–0 of 0</span>
+            <span id="receivingPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0&ndash;0 of 0</span>
             <div class="flex items-center gap-2">
               <button type="button" id="recPrevBtn" onclick="changeLedgerPage('receiving', -1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-sky-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
                 &larr; Back
@@ -924,7 +926,7 @@
           </table>
           <!-- Withdrawal Pagination Controls -->
           <div id="withdrawalPaginationBar" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 bg-slate-200/40 dark:bg-slate-800/60 border-t border-slate-200/60 dark:border-slate-700/60 text-xs">
-            <span id="withdrawalPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0–0 of 0</span>
+            <span id="withdrawalPageInfo" class="font-mono text-slate-600 dark:text-slate-300">Showing 0&ndash;0 of 0</span>
             <div class="flex items-center gap-2">
               <button type="button" id="witPrevBtn" onclick="changeLedgerPage('withdrawal', -1)" class="px-3 py-1.5 rounded-lg font-bold glass-input hover:border-amber-400 disabled:opacity-40 disabled:pointer-events-none cursor-pointer">
                 &larr; Back
@@ -1158,7 +1160,7 @@
     </div>
   </div>
 
-  <!-- ADD NEW ITEM MODAL (+ BUTTON) -->
+  <!-- ADD NEW ITEM MODAL (+ BUTTON WITH + ADD CATEGORY GROUP BUTTON) -->
   <div id="addNewItemModal" onclick="closeAddNewItemModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 p-4 flex items-center justify-center">
     <div onclick="event.stopPropagation()" class="w-full max-w-md glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
       <div class="flex items-center justify-between">
@@ -1170,14 +1172,33 @@
       </div>
       <form id="addNewItemForm" onsubmit="handleAddNewItemSubmit(event)" class="space-y-3.5">
         <div>
-          <label for="newItemCategory" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-            Category / Group <span class="text-rose-500">*</span>
-          </label>
-          <select id="newItemCategory" required class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
-            <option value="Pop Materials">Pop Materials</option>
-            <option value="Polo Shirt">Polo Shirt</option>
-            <option value="Cellphone">Cellphone</option>
-          </select>
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <label for="newItemCategory" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Category / Group <span class="text-rose-500">*</span>
+            </label>
+            <button type="button" onclick="toggleAddCategoryGroupRow()" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-sky-500/20 hover:bg-sky-500/30 text-sky-600 dark:text-sky-300 border border-sky-500/35 cursor-pointer" title="Add New Category Group">+ Add Category Group</button>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="newItemCategory" required class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input font-medium">
+              <option value="Pop Materials">Pop Materials</option>
+              <option value="Polo Shirt">Polo Shirt</option>
+              <option value="Cellphone">Cellphone</option>
+            </select>
+            <button type="button" onclick="toggleAddCategoryGroupRow()" class="w-10 h-10 shrink-0 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-lg flex items-center justify-center shadow cursor-pointer" title="Add New Category Group">+</button>
+          </div>
+
+          <!-- Inline New Category Group Creator -->
+          <div id="newCategoryGroupRow" class="hidden mt-2.5 p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 space-y-2">
+            <label for="newCategoryGroupInput" class="block text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-300">
+              New Category Group Name
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="newCategoryGroupInput" placeholder="e.g., Tarpaulin, Giveaway, Signage" class="flex-1 rounded-xl px-3 py-2 text-xs sm:text-sm glass-input" />
+              <button type="button" onclick="handleAddCategoryGroup()" class="px-3 py-2 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 shadow cursor-pointer shrink-0">
+                Add Group
+              </button>
+            </div>
+          </div>
         </div>
         <div>
           <label for="newItemName" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
@@ -1235,6 +1256,8 @@
     const STORAGE_KEY_CACHE_WIT = 'imerch_wh_cache_wit_v1';
     const STORAGE_KEY_CUSTOM_ITEMS = 'imerch_wh_custom_items_v1';
     const STORAGE_KEY_CUSTOM_CLIENTS = 'imerch_wh_custom_clients_v1';
+    const STORAGE_KEY_CUSTOM_CATEGORIES = 'imerch_wh_custom_categories_v1';
+    const DEFAULT_CATEGORIES = ['Pop Materials', 'Polo Shirt', 'Cellphone'];
 
     // White logo sa Dark Mode, Black logo sa Light Mode
     const LOGO_LIGHT = 'imerchlogoblack.png';
@@ -1259,6 +1282,7 @@
       initTheme();
       setDefaultDateTime();
       renderClientDropdowns();
+      renderCategoryGroupSelect();
       renderItemDropdowns();
       renderClientKpiSummary();
 
@@ -1416,6 +1440,12 @@
             localStorage.setItem(STORAGE_KEY_CUSTOM_CLIENTS, JSON.stringify(mergedClients));
             renderClientDropdowns();
           }
+          if (Array.isArray(json.categories)) {
+            const sheetCats = json.categories.map(c => String(c || '').trim()).filter(Boolean);
+            const existingCustomCats = getCustomCategories();
+            const mergedCats = Array.from(new Set([...existingCustomCats, ...sheetCats]));
+            localStorage.setItem(STORAGE_KEY_CUSTOM_CATEGORIES, JSON.stringify(mergedCats));
+          }
           if (Array.isArray(json.catalog)) {
             const customFromSheet = json.catalog
               .filter(item => item && item.name)
@@ -1426,8 +1456,9 @@
                 isPolo: Boolean(item.isPolo)
               }));
             localStorage.setItem(STORAGE_KEY_CUSTOM_ITEMS, JSON.stringify(customFromSheet));
-            renderItemDropdowns();
           }
+          renderCategoryGroupSelect();
+          renderItemDropdowns();
 
           receivingList = (json.receiving || []).map(r => ({
             receiptId: String(r['Receipt ID'] || ''),
@@ -1488,7 +1519,7 @@
 
     function getNextSlipTag(prefix, list, key) {
       let maxNum = 0;
-      const rx = new RegExp(prefix + '(\\d+)', 'i');
+      const rx = new RegExp(prefix + '(\d+)', 'i');
       list.forEach(item => {
         const m = String(item[key] || '').match(rx);
         if (m) {
@@ -2179,7 +2210,7 @@
       }, 3400);
     }
 
-    /* ================= DYNAMIC CLIENTS & CATALOG (NO DEFAULT SEEDS) ================= */
+    /* ================= DYNAMIC CLIENTS & CATALOG ================= */
     function getAllClients() {
       const set = new Set();
       try {
@@ -2275,17 +2306,100 @@
       showToast(`Client "${name}" added.`, 'success');
     }
 
+    function getCustomCategories() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_CATEGORIES) || '[]');
+        return Array.isArray(parsed) ? parsed.map(c => String(c || '').trim()).filter(Boolean) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function getAllCategories() {
+      const set = new Set(DEFAULT_CATEGORIES);
+      getCustomCategories().forEach(c => set.add(c));
+      try {
+        const customItems = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ITEMS) || '[]');
+        if (Array.isArray(customItems)) {
+          customItems.forEach(it => {
+            if (it && it.category) set.add(String(it.category).trim());
+          });
+        }
+      } catch (e) {}
+      return Array.from(set);
+    }
+
+    function renderCategoryGroupSelect(selectedCat = '') {
+      const sel = document.getElementById('newItemCategory');
+      if (!sel) return;
+      const cats = getAllCategories();
+      const target = selectedCat || sel.value || cats[0] || 'Pop Materials';
+      sel.innerHTML = cats.map(c =>
+        `<option value="${escapeHtml(c)}"${c === target ? ' selected' : ''}>${escapeHtml(c)}</option>`
+      ).join('');
+    }
+
+    function toggleAddCategoryGroupRow() {
+      const row = document.getElementById('newCategoryGroupRow');
+      const inp = document.getElementById('newCategoryGroupInput');
+      if (!row) return;
+      const isHidden = row.classList.contains('hidden');
+      row.classList.toggle('hidden', !isHidden);
+      if (isHidden && inp) {
+        setTimeout(() => inp.focus(), 40);
+      }
+    }
+
+    async function handleAddCategoryGroup() {
+      const inp = document.getElementById('newCategoryGroupInput');
+      const row = document.getElementById('newCategoryGroupRow');
+      const groupName = (inp?.value || '').trim();
+      if (!groupName) {
+        showToast('Ilagay muna ang pangalan ng bagong Category Group.', 'warning');
+        if (inp) inp.focus();
+        return;
+      }
+
+      const existingAll = getAllCategories();
+      const matched = existingAll.find(c => c.toLowerCase() === groupName.toLowerCase());
+      const finalGroup = matched || groupName;
+
+      if (!matched) {
+        const customCats = getCustomCategories();
+        customCats.push(finalGroup);
+        localStorage.setItem(STORAGE_KEY_CUSTOM_CATEGORIES, JSON.stringify(Array.from(new Set(customCats))));
+      }
+
+      renderCategoryGroupSelect(finalGroup);
+      renderItemDropdowns();
+      if (inp) inp.value = '';
+      if (row) row.classList.add('hidden');
+
+      const token = getSessionToken();
+      if (token && !matched) {
+        try {
+          await fetch(DEFAULT_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ token, action: 'add_category_group', categoryName: finalGroup })
+          });
+        } catch (err) {}
+      }
+
+      showToast(`Category Group "${finalGroup}" ready na sa dropdown.`, 'success');
+    }
+
     function getMergedCatalog() {
-      const merged = {
-        'Polo Shirt': [],
-        'Pop Materials': [],
-        'Cellphone': []
-      };
+      const merged = {};
+      getAllCategories().forEach(cat => {
+        merged[cat] = [];
+      });
       try {
         const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ITEMS) || '[]');
         if (Array.isArray(custom)) {
           custom.forEach(item => {
-            const cat = merged[item.category] ? item.category : 'Pop Materials';
+            const rawCat = String(item.category || 'Pop Materials').trim();
+            const cat = merged[rawCat] ? rawCat : (rawCat || 'Pop Materials');
+            if (!merged[cat]) merged[cat] = [];
             if (item && item.name && !merged[cat].some(x => x.name.toLowerCase() === item.name.toLowerCase())) {
               merged[cat].push({
                 name: item.name,
@@ -2360,6 +2474,9 @@
     function openAddNewItemModal(prefix) {
       targetItemPrefix = prefix || 'rec';
       document.getElementById('addNewItemForm').reset();
+      renderCategoryGroupSelect();
+      const row = document.getElementById('newCategoryGroupRow');
+      if (row) row.classList.add('hidden');
       document.getElementById('addNewItemModal').classList.remove('hidden');
       setTimeout(() => document.getElementById('newItemName').focus(), 50);
     }
@@ -2378,6 +2495,14 @@
       const btn = document.getElementById('saveNewItemBtn');
       const origText = btn ? btn.textContent : 'Save to Dropdown';
       if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+
+      if (category && !DEFAULT_CATEGORIES.includes(category)) {
+        const customCats = getCustomCategories();
+        if (!customCats.some(c => c.toLowerCase() === category.toLowerCase())) {
+          customCats.push(category);
+          localStorage.setItem(STORAGE_KEY_CUSTOM_CATEGORIES, JSON.stringify(customCats));
+        }
+      }
 
       let customList = [];
       try {
@@ -2544,7 +2669,7 @@
       XLSX.writeFile(wb, `iMerch_Warehouse_${safeFile}_${new Date().toISOString().split('T')[0]}.xlsx`);
       showToast(`Exported Excel for ${selectedClient === 'ALL' ? 'All Clients' : selectedClient}.`, 'success');
     }
-  
+
     /* ================= SEARCHABLE ITEM DROPDOWN ================= */
     function getFlatCatalogItems() {
       const catalog = getMergedCatalog();
@@ -2648,7 +2773,7 @@
       });
     });
 
-  
+    /* ================= SEARCHABLE RECEIVED STOCK IN WITHDRAWAL ================= */
     function filterReceivedWithdrawalList() {
       const inp = document.getElementById('witReceivedSearch');
       const box = document.getElementById('witReceivedSearchResults');
@@ -2724,7 +2849,6 @@
         box.classList.add('hidden');
       }
     });
-
   </script>
 </body>
 </html>
