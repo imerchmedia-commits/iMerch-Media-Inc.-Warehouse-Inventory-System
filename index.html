@@ -492,16 +492,34 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label for="recCheckedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Checked / Received by (Warehouse Assistant) <span class="text-rose-500">*</span>
-                  </label>
-                  <input type="text" id="recCheckedBy" required placeholder="Warehouse Assistant name" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <label for="recCheckedBy" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Checked / Received by (Warehouse Assistant) <span class="text-rose-500">*</span>
+                    </label>
+                    <button type="button" onclick="openAddPersonnelModal('assistant')" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-sky-500/20 hover:bg-sky-500/30 text-sky-600 dark:text-sky-300 border border-sky-500/35 cursor-pointer" title="Add Warehouse Assistant">+ Add</button>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <select id="recCheckedBy" required class="w-full rounded-xl px-3.5 py-2 text-sm glass-input font-medium">
+                      <option value="">-- Select Warehouse Assistant --</option>
+                      <option value="Domingo Abrea" selected>Domingo Abrea</option>
+                    </select>
+                    <button type="button" onclick="openAddPersonnelModal('assistant')" class="w-9 h-9 shrink-0 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-base flex items-center justify-center shadow cursor-pointer" title="Add Warehouse Assistant">+</button>
+                  </div>
                 </div>
                 <div>
-                  <label for="recApprovedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                    Approved By (Warehouse Supervisor) <span class="text-rose-500">*</span>
-                  </label>
-                  <input type="text" id="recApprovedBy" required placeholder="Warehouse Supervisor name" class="w-full rounded-xl px-3.5 py-2 text-sm glass-input" />
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <label for="recApprovedBy" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Approved By (Warehouse Supervisor) <span class="text-rose-500">*</span>
+                    </label>
+                    <button type="button" onclick="openAddPersonnelModal('supervisor')" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-sky-500/20 hover:bg-sky-500/30 text-sky-600 dark:text-sky-300 border border-sky-500/35 cursor-pointer" title="Add Warehouse Supervisor">+ Add</button>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <select id="recApprovedBy" required class="w-full rounded-xl px-3.5 py-2 text-sm glass-input font-medium">
+                      <option value="">-- Select Warehouse Supervisor --</option>
+                      <option value="Eleazar Famorcan" selected>Eleazar Famorcan</option>
+                    </select>
+                    <button type="button" onclick="openAddPersonnelModal('supervisor')" class="w-9 h-9 shrink-0 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-base flex items-center justify-center shadow cursor-pointer" title="Add Warehouse Supervisor">+</button>
+                  </div>
                 </div>
               </div>
 
@@ -748,10 +766,19 @@
                 <input type="text" id="witNotedBy" required placeholder="Operation Head name" class="w-full rounded-xl px-3 py-2 text-sm glass-input" />
               </div>
               <div>
-                <label for="witReleasedBy" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
-                  Checked/Released by (Warehouse Supervisor) <span class="text-rose-500">*</span>
-                </label>
-                <input type="text" id="witReleasedBy" required placeholder="Warehouse Supervisor" class="w-full rounded-xl px-3 py-2 text-sm glass-input" />
+                <div class="flex items-center justify-between gap-2 mb-1">
+                  <label for="witReleasedBy" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Checked/Released by (Warehouse Supervisor) <span class="text-rose-500">*</span>
+                  </label>
+                  <button type="button" onclick="openAddPersonnelModal('supervisor')" class="px-2 py-0.5 rounded-lg text-[11px] font-bold bg-sky-500/20 hover:bg-sky-500/30 text-sky-600 dark:text-sky-300 border border-sky-500/35 cursor-pointer" title="Add Warehouse Supervisor">+ Add</button>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <select id="witReleasedBy" required class="w-full rounded-xl px-3 py-2 text-sm glass-input font-medium">
+                    <option value="">-- Select Warehouse Supervisor --</option>
+                    <option value="Eleazar Famorcan" selected>Eleazar Famorcan</option>
+                  </select>
+                  <button type="button" onclick="openAddPersonnelModal('supervisor')" class="w-9 h-9 shrink-0 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-base flex items-center justify-center shadow cursor-pointer" title="Add Warehouse Supervisor">+</button>
+                </div>
               </div>
             </div>
 
@@ -1218,6 +1245,31 @@
     </div>
   </div>
 
+  <!-- ADD NEW PERSONNEL MODAL (WAREHOUSE ASSISTANT / SUPERVISOR) -->
+  <div id="addPersonnelModal" onclick="closeAddPersonnelModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 p-4 flex items-center justify-center">
+    <div onclick="event.stopPropagation()" class="w-full max-w-md glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 id="addPersonnelModalTitle" class="text-base font-bold text-slate-900 dark:text-white">Add Warehouse Personnel</h3>
+          <p id="addPersonnelModalDesc" class="text-xs text-slate-500 dark:text-slate-400">Madadagdag sa signatory dropdown</p>
+        </div>
+        <button type="button" onclick="closeAddPersonnelModal()" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-500/20 text-rose-400 cursor-pointer">X</button>
+      </div>
+      <form id="addPersonnelForm" onsubmit="handleAddPersonnelSubmit(event)" class="space-y-3.5">
+        <div>
+          <label for="newPersonnelName" class="block text-xs font-semibold mb-1 text-slate-700 dark:text-slate-300">
+            Full Name <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="newPersonnelName" required placeholder="Enter full name" class="w-full rounded-xl px-3.5 py-2.5 text-sm glass-input" />
+        </div>
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="closeAddPersonnelModal()" class="px-4 py-2 rounded-xl text-xs font-semibold glass-input cursor-pointer">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-sky-600 hover:bg-sky-500 shadow cursor-pointer">Save Name</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ADD NEW CLIENT MODAL (+ BUTTON) -->
   <div id="addClientModal" onclick="closeAddClientModal()" class="fixed inset-0 z-50 hidden bg-slate-950/80 p-4 flex items-center justify-center">
     <div onclick="event.stopPropagation()" class="w-full max-w-md glass-panel rounded-2xl p-5 sm:p-6 space-y-4">
@@ -1245,7 +1297,7 @@
 
   <script>
     // PALITAN ITO NG DEPLOYED GOOGLE APPS SCRIPT WEB APP URL MO
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzNsldBnwn9HL9jFi_L7M7pLe_JVMposBKaEakov1F19nxAX4eoqLPwp2AWaH0p4XL/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlwQmKhmynAzzKetYOkytEitcu6uw3hnEuEsKBDjNFjmcxKKQKpS9v4_9jBzSOAxRr/exec';
 
     const STORAGE_KEY_THEME = 'imerch_theme_mode';
     const STORAGE_KEY_TOKEN = 'imerch_wh_session_token';
@@ -1255,6 +1307,10 @@
     const STORAGE_KEY_CUSTOM_ITEMS = 'imerch_wh_custom_items_v1';
     const STORAGE_KEY_CUSTOM_CLIENTS = 'imerch_wh_custom_clients_v1';
     const STORAGE_KEY_CUSTOM_CATEGORIES = 'imerch_wh_custom_categories_v1';
+    const STORAGE_KEY_CUSTOM_ASSISTANTS = 'imerch_wh_custom_assistants_v1';
+    const STORAGE_KEY_CUSTOM_SUPERVISORS = 'imerch_wh_custom_supervisors_v1';
+    const DEFAULT_WAREHOUSE_ASSISTANTS = ['Domingo Abrea'];
+    const DEFAULT_WAREHOUSE_SUPERVISORS = ['Eleazar Famorcan'];
     const DEFAULT_CATEGORIES = [];
 
     // White logo sa Dark Mode, Black logo sa Light Mode
@@ -1279,6 +1335,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       setDefaultDateTime();
+      renderPersonnelDropdowns();
       renderClientDropdowns();
       renderCategoryGroupSelect();
       renderItemDropdowns();
@@ -1439,10 +1496,8 @@
             renderClientDropdowns();
           }
           if (Array.isArray(json.categories)) {
-            const sheetCats = json.categories.map(c => String(c || '').trim()).filter(Boolean);
-            const existingCustomCats = getCustomCategories();
-            const mergedCats = Array.from(new Set([...existingCustomCats, ...sheetCats]));
-            localStorage.setItem(STORAGE_KEY_CUSTOM_CATEGORIES, JSON.stringify(mergedCats));
+            const sheetCats = Array.from(new Set(json.categories.map(c => String(c || '').trim()).filter(Boolean)));
+            localStorage.setItem(STORAGE_KEY_CUSTOM_CATEGORIES, JSON.stringify(sheetCats));
           }
           if (Array.isArray(json.catalog)) {
             const customFromSheet = json.catalog
@@ -1508,6 +1563,7 @@
     function refreshAllViews() {
       updateKPIs();
       renderClientDropdowns();
+      renderPersonnelDropdowns();
       renderClientKpiSummary();
       updateSlipTagDisplay();
       populateWithdrawalItemDropdown();
@@ -1596,6 +1652,7 @@
 
     function resetReceivingForm() {
       document.getElementById('receivingForm').reset();
+      renderPersonnelDropdowns('Domingo Abrea', 'Eleazar Famorcan');
       clearReceivingPhoto();
       setDefaultDateTime();
       updateSlipTagDisplay();
@@ -1718,6 +1775,7 @@
 
     function resetWithdrawalForm() {
       document.getElementById('withdrawalForm').reset();
+      renderPersonnelDropdowns('', 'Eleazar Famorcan');
       document.getElementById('witSelectedItemCard').classList.add('hidden');
       setDefaultDateTime();
       updateSlipTagDisplay();
@@ -2851,6 +2909,108 @@
         box.classList.add('hidden');
       }
     });
+
+    /* ================= WAREHOUSE PERSONNEL DROPDOWNS ================= */
+    let activePersonnelRole = 'assistant';
+
+    function getWarehouseAssistants() {
+      const set = new Set(DEFAULT_WAREHOUSE_ASSISTANTS);
+      try {
+        const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_ASSISTANTS) || '[]');
+        if (Array.isArray(custom)) custom.forEach(n => { if (n) set.add(String(n).trim()); });
+      } catch (e) {}
+      receivingList.forEach(r => { if (r.checkedBy) set.add(String(r.checkedBy).trim()); });
+      return Array.from(set);
+    }
+
+    function getWarehouseSupervisors() {
+      const set = new Set(DEFAULT_WAREHOUSE_SUPERVISORS);
+      try {
+        const custom = JSON.parse(localStorage.getItem(STORAGE_KEY_CUSTOM_SUPERVISORS) || '[]');
+        if (Array.isArray(custom)) custom.forEach(n => { if (n) set.add(String(n).trim()); });
+      } catch (e) {}
+      receivingList.forEach(r => { if (r.approvedBy) set.add(String(r.approvedBy).trim()); });
+      withdrawalList.forEach(w => { if (w.releasedBy) set.add(String(w.releasedBy).trim()); });
+      return Array.from(set);
+    }
+
+    function renderPersonnelDropdowns(selectedAssistant = '', selectedSupervisor = '') {
+      const assistants = getWarehouseAssistants();
+      const supervisors = getWarehouseSupervisors();
+
+      const recCheckedEl = document.getElementById('recCheckedBy');
+      const recApprovedEl = document.getElementById('recApprovedBy');
+      const witReleasedEl = document.getElementById('witReleasedBy');
+
+      const curAsst = selectedAssistant || (recCheckedEl && recCheckedEl.value) || 'Domingo Abrea';
+      const curSupRec = selectedSupervisor || (recApprovedEl && recApprovedEl.value) || 'Eleazar Famorcan';
+      const curSupWit = selectedSupervisor || (witReleasedEl && witReleasedEl.value) || 'Eleazar Famorcan';
+
+      if (recCheckedEl) {
+        recCheckedEl.innerHTML = '<option value="">-- Select Warehouse Assistant --</option>' +
+          assistants.map(name => `<option value="${escapeHtml(name)}"${name === curAsst ? ' selected' : ''}>${escapeHtml(name)}</option>`).join('');
+      }
+      if (recApprovedEl) {
+        recApprovedEl.innerHTML = '<option value="">-- Select Warehouse Supervisor --</option>' +
+          supervisors.map(name => `<option value="${escapeHtml(name)}"${name === curSupRec ? ' selected' : ''}>${escapeHtml(name)}</option>`).join('');
+      }
+      if (witReleasedEl) {
+        witReleasedEl.innerHTML = '<option value="">-- Select Warehouse Supervisor --</option>' +
+          supervisors.map(name => `<option value="${escapeHtml(name)}"${name === curSupWit ? ' selected' : ''}>${escapeHtml(name)}</option>`).join('');
+      }
+    }
+
+    function openAddPersonnelModal(role) {
+      activePersonnelRole = role === 'supervisor' ? 'supervisor' : 'assistant';
+      const titleEl = document.getElementById('addPersonnelModalTitle');
+      const descEl = document.getElementById('addPersonnelModalDesc');
+      if (titleEl) {
+        titleEl.textContent = activePersonnelRole === 'supervisor'
+          ? 'Add Warehouse Supervisor'
+          : 'Add Warehouse Assistant';
+      }
+      if (descEl) {
+        descEl.textContent = activePersonnelRole === 'supervisor'
+          ? 'Madadagdag sa Approved By / Released By dropdown'
+          : 'Madadagdag sa Checked / Received By dropdown';
+      }
+      document.getElementById('addPersonnelForm').reset();
+      document.getElementById('addPersonnelModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('newPersonnelName').focus(), 50);
+    }
+
+    function closeAddPersonnelModal() {
+      document.getElementById('addPersonnelModal').classList.add('hidden');
+    }
+
+    function handleAddPersonnelSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('newPersonnelName').value.trim();
+      if (!name) return;
+
+      const key = activePersonnelRole === 'supervisor'
+        ? STORAGE_KEY_CUSTOM_SUPERVISORS
+        : STORAGE_KEY_CUSTOM_ASSISTANTS;
+
+      let list = [];
+      try {
+        list = JSON.parse(localStorage.getItem(key) || '[]');
+        if (!Array.isArray(list)) list = [];
+      } catch (err) { list = []; }
+
+      if (!list.some(x => String(x).toLowerCase() === name.toLowerCase())) {
+        list.push(name);
+        localStorage.setItem(key, JSON.stringify(list));
+      }
+
+      if (activePersonnelRole === 'supervisor') {
+        renderPersonnelDropdowns('', name);
+      } else {
+        renderPersonnelDropdowns(name, '');
+      }
+      closeAddPersonnelModal();
+      showToast(`Added "${name}" to dropdown.`, 'success');
+    }
   </script>
 </body>
 </html>
